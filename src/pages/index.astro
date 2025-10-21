@@ -2,20 +2,572 @@
 import PlotFigure from "../components/PlotFigure.astro";
 import Layout from "../layouts/Layout.astro";
 import * as Plot from "@observablehq/plot";
-import penguins from "../assets/penguins.json";
+import data from "../assets/DataCulturelles2025.json";
+
+const colors = {
+  Bordeaux: "#0077B6",
+  Montpellier: "#F77F00",
+};
+
+const DataCulturellesPhysiques2025 = data.filter(
+  (d) => d.type_offre === "physique"
+);
+
+const populations = {
+  Bordeaux: 1018000,
+  Montpellier: 487000,
+};
+
+const LieuxParVilleType = ["Bordeaux", "Montpellier", "Talence"]
+  .flatMap((ville) => {
+    const typesOffre = ["physique", "numérique"];
+    return typesOffre.map((type_offre) => {
+      const lieux = data.filter(
+        (d) => d.ville === ville && d.type_offre === type_offre
+      ).length;
+      const pop = populations[ville];
+
+      return {
+        ville,
+        type_offre,
+        lieux,
+        habitants_par_lieu: pop && lieux > 0 ? Math.round(pop / lieux) : null,
+      };
+    });
+  })
+  .filter((d) => d.habitants_par_lieu !== null);
 ---
 
 <Layout>
-  <h1 class="text-2xl">Test Astro et Plot (Observablehq)</h1>
-  <PlotFigure
-    options={{
+  <section
+    class="snap-section relative overflow-hidden bg-black min-h-screen flex items-center"
+  >
+    <div class="absolute inset-0">
+      <img
+        src="/src/assets/img/fond_bordeaux.jpg"
+        alt="Carte de Bordeaux"
+        class="w-full h-full object-cover opacity-30 grayscale"
+      />
+    </div>
+
+    <div
+      class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/90"
+    >
+    </div>
+
+    <div class="absolute inset-0 opacity-[0.02]">
+      <div
+        class="absolute inset-0"
+        style="background-image: repeating-linear-gradient(0deg, transparent, transparent 1px, currentColor 1px, currentColor 2px), repeating-linear-gradient(90deg, transparent, transparent 1px, currentColor 1px, currentColor 2px); background-size: 40px 40px;"
+      >
+      </div>
+    </div>
+
+    <div class="container mx-auto px-6 relative z-10 w-full">
+      <div class="max-w-5xl mx-auto text-center fade-in-section">
+        <div
+          class="text-xs uppercase tracking-[0.2em] text-base-content/40 mb-8"
+        >
+          SAÉ 303 — Datavisualisation
+        </div>
+
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-serif mb-8">
+          Tradition<br />
+          <span class="italic">vs</span><br />
+          Innovation
+        </h1>
+
+        <p
+          class="text-xl md:text-2xl text-base-content/60 mb-4 max-w-2xl mx-auto font-light"
+        >
+          Une exploration comparative des offres culturelles
+        </p>
+
+        <div
+          class="flex items-center justify-center gap-6 mb-16 text-base-content/50"
+        >
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded-full bg-gray-400"></div>
+            <span class="text-sm">Bordeaux</span>
+          </div>
+          <div class="w-px h-4 bg-base-content/20"></div>
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded-full bg-white"></div>
+            <span class="text-sm">Montpellier</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-20">
+          <a
+            href="#intro"
+            class="btn bg-white text-black hover:bg-gray-200 btn-lg border-0"
+          >
+            Découvrir l'analyse
+          </a>
+          <a
+            href="#about"
+            class="btn btn-ghost btn-lg border border-white/20 hover:bg-white/10"
+            >Méthodologie</a
+          >
+        </div>
+
+        <div
+          class="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-4xl mx-auto text-center"
+        >
+          <div>
+            <div class="text-5xl md:text-6xl font-serif mb-2 text-gray-400">
+              407
+            </div>
+            <div class="text-sm text-base-content/60">Monuments à Bordeaux</div>
+          </div>
+          <div>
+            <div class="text-5xl md:text-6xl font-serif mb-2 text-white">
+              51
+            </div>
+            <div class="text-sm text-base-content/60">
+              Festivals à Montpellier
+            </div>
+          </div>
+          <div>
+            <div class="text-5xl md:text-6xl font-serif mb-2">8</div>
+            <div class="text-sm text-base-content/60">Catégories analysées</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section
+    id="intro"
+    class="snap-section bg-[#F2F2F2] min-h-screen flex items-center"
+  >
+    <div class="container mx-auto max-w-4xl px-6 py-24">
+      <div class="space-y-8 fade-in-section">
+        <div class="text-xs uppercase tracking-[0.3em] text-gray-500">
+          Introduction
+        </div>
+
+        <h2
+          class="text-4xl md:text-5xl lg:text-6xl font-serif text-[#111111] leading-tight"
+        >
+          Culture et numérique : une mutation territoriale
+        </h2>
+
+        <div class="prose prose-lg max-w-none">
+          <p class="text-xl text-gray-700 leading-relaxed mb-6">
+            Dans un monde dans lequel le numérique s'invite dans chaque domaine,
+            la culture n'y échappe pas. Les institutions patrimoniales se
+            digitalisent, les festivals se diffusent en ligne, les publics se
+            diversifient. Dans ce mouvement, les villes deviennent des acteurs
+            majeurs de cette mutation culturelle.
+          </p>
+
+          <p class="text-xl text-gray-700 leading-relaxed mb-6">
+            Pour illustrer cela, notre étude se concentre sur deux acteurs qui
+            partagent le statut de métropole culturelle : <span
+              class="font-semibold text-[#111111]">Bordeaux</span
+            > et <span class="font-semibold text-[#111111]">Montpellier</span>.
+            Toutefois, malgré leur statut commun, chacune connaît une évolution
+            différente. Bordeaux incarne le visage d'une ville profondément
+            ancrée dans un patrimoine historique et muséal, tandis que
+            Montpellier représente un pôle d'expérimentation culturelle,
+            numérique et un dynamisme dans l'événementiel.
+          </p>
+
+          <p class="text-xl text-gray-700 leading-relaxed">
+            À travers notre étude, nous souhaitons comparer comment ces deux
+            villes adoptent une stratégie bien différente concernant l'accès à
+            la culture, croisant leur offre physique (lieux, équipements,
+            événements) et leur offre numérique (innovations, lieux de création
+            de contenus culturels numériques, médiations). Cela nous laisse une
+            ouverture sur l'avenir de la culture en France, entre préservation
+            et transition numérique.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section
+    id="chapitre-01"
+    class="snap-section bg-[#F2F2F2] min-h-screen flex items-center"
+  >
+    <div class="container mx-auto max-w-7xl px-6 py-24">
+      <div class="fade-in-section">
+        <div class="max-w-4xl mb-16">
+          <div class="text-xs uppercase tracking-[0.2em] text-gray-500 mb-6">
+            Chapitre 01
+          </div>
+          <h2 class="text-4xl md:text-6xl font-serif mb-6 text-[#111111]">
+            Accessibilité culturelle physique et numérique
+          </h2>
+          <p class="text-lg text-gray-700 leading-relaxed max-w-3xl">
+            Tout d'abord, il est important de comprendre les stratégies
+            respectives de ces deux métropoles. Pour cela, nous comparons le
+            nombre d'habitants par lieu culturel et offre numérique proposée
+            dans chaque ville, ce qui permet de visualiser la densité d'accès.
+          </p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-12 items-start mb-16">
+          <div class="bg-white rounded-2xl p-8 shadow-sm">
+            <div class="mb-6">
+              <label class="text-sm font-semibold text-[#111111] mb-3 block">
+                Type d'offre à afficher :
+              </label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="choixType"
+                    value="physique"
+                    checked
+                    class="radio radio-sm radio-primary"
+                  />
+                  <span class="text-gray-700">Physique</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="choixType"
+                    value="numérique"
+                    class="radio radio-sm radio-primary"
+                  />
+                  <span class="text-gray-700">Numérique</span>
+                </label>
+              </div>
+            </div>
+            <div id="chart-container"></div>
+          </div>
+
+          <div class="space-y-8">
+            <div>
+              <h3 class="text-2xl md:text-3xl font-serif text-[#111111] mb-4">
+                Montpellier, une stratégie tournée vers l'avenir
+              </h3>
+              <p class="text-lg text-gray-700 leading-relaxed mb-4">
+                À travers ces résultats, on observe clairement le positionnement
+                de Montpellier comme la ville explorant les nouvelles formes de
+                médiation numérique, avec <span
+                  class="text-[#F77F00] font-semibold"
+                  >44 273 habitants par offre numérique</span
+                > contre <span class="text-[#0077B6] font-semibold"
+                  >84 833 pour Bordeaux</span
+                >.
+              </p>
+              <p class="text-lg text-gray-700 leading-relaxed">
+                Montpellier offre une densité d'accès à l'innovation presque
+                deux fois supérieure à celle de Bordeaux. Cela traduit un
+                investissement fort visant à rapprocher l'offre culturelle
+                immatérielle de ses habitants, faisant d'elle la leader de
+                l'accessibilité culturelle numérique dans cette comparaison.
+              </p>
+            </div>
+
+            <div>
+              <h3 class="text-2xl md:text-3xl font-serif text-[#111111] mb-4">
+                Bordeaux, ancrage dans le patrimoine plus classique
+              </h3>
+              <p class="text-lg text-gray-700 leading-relaxed mb-4">
+                À l'inverse, Bordeaux maintient une forte accessibilité à ses
+                lieux culturels, avec <span class="text-[#0077B6] font-semibold"
+                  >1 647 habitants par lieu culturel physique</span
+                >. Bien que légèrement moins dense que Montpellier (1 517),
+                cette donnée montre un maillage du territoire relativement fort.
+              </p>
+              <p class="text-lg text-gray-700 leading-relaxed">
+                C'est le contraste avec le numérique qui révèle la stratégie de
+                Bordeaux : le fossé avec le numérique est colossal. En effet,
+                l'offre numérique est <span class="font-semibold text-[#111111]"
+                  >51,5 fois moins accessible</span
+                > que l'offre physique ; inversement, pour Montpellier, l'offre numérique
+                est <span class="font-semibold text-[#111111]"
+                  >29,2 fois moins accessible</span
+                > que l'offre physique.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-8 border-l-4 border-[#111111]">
+          <p class="text-xl text-gray-700 leading-relaxed italic">
+            En somme, <span class="font-semibold text-[#0077B6]">Bordeaux</span>
+            cherche la réinvention en consolidant son patrimoine, l'offre physique
+            étant prioritaire, tandis que <span
+              class="font-semibold text-[#F77F00]">Montpellier</span
+            > cherche la réinvention en privilégiant le partage de la culture par
+            le biais du numérique.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div
+    id="progress-indicator"
+    class="fixed right-8 top-1/2 -translate-y-1/2 z-50 hidden md:flex flex-col gap-3 opacity-0 transition-opacity duration-500"
+  >
+    <a
+      href="#intro"
+      class="progress-dot w-2 h-2 rounded-full bg-black/30 hover:bg-black/60 transition-all duration-300"
+      data-section="0"></a>
+    <a
+      href="#chapitre-01"
+      class="progress-dot w-2 h-2 rounded-full bg-black/30 hover:bg-black/60 transition-all duration-300"
+      data-section="1"></a>
+  </div>
+</Layout>
+
+<style>
+  :global(html) {
+    scroll-behavior: smooth;
+  }
+
+  .snap-section {
+  }
+
+  .fade-in-section {
+    opacity: 0;
+    transform: translateY(40px);
+    transition:
+      opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .fade-in-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .progress-dot.active {
+    background-color: #111111;
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .prose p {
+    margin-bottom: 1.5rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html) {
+      scroll-behavior: auto;
+    }
+
+    .fade-in-section {
+      transition: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  declare global {
+    interface Window {
+      Plot: any;
+      d3: any;
+    }
+  }
+
+  const observerOptions = {
+    threshold: 0.2,
+    rootMargin: "0px 0px -10% 0px",
+  };
+
+  const fadeObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll(".fade-in-section").forEach((section) => {
+    fadeObserver.observe(section);
+  });
+
+  const storytellingSections = [
+    document.getElementById("intro"),
+    document.getElementById("chapitre-01"),
+  ];
+  const progressIndicator = document.getElementById("progress-indicator");
+  const progressDots = document.querySelectorAll(".progress-dot");
+
+  const sectionObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const index = storytellingSections.indexOf(
+            entry.target as HTMLElement
+          );
+          if (index !== -1) {
+            progressDots.forEach((dot, i) => {
+              if (i === index) {
+                dot.classList.add("active");
+              } else {
+                dot.classList.remove("active");
+              }
+            });
+          }
+        }
+      });
+    },
+    { threshold: 0.5 }
+  );
+
+  storytellingSections.forEach((section) => {
+    if (section) sectionObserver.observe(section);
+  });
+
+  const heroSection = document.querySelector(".snap-section");
+  const heroObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          progressIndicator?.classList.add("opacity-0");
+        } else {
+          progressIndicator?.classList.remove("opacity-0");
+        }
+      });
+    },
+    { threshold: 0.3 }
+  );
+
+  if (heroSection) heroObserver.observe(heroSection);
+
+  const LieuxParVilleTypeData = JSON.parse(
+    document.getElementById("data-lieux")?.textContent || "[]"
+  );
+
+  const colors = {
+    Bordeaux: "#0077B6",
+    Montpellier: "#F77F00",
+  };
+
+  function renderChart(choixType) {
+    const container = document.getElementById("chart-container");
+    if (!container || !window.Plot) return;
+
+    container.innerHTML = "";
+
+    const filteredData = LieuxParVilleTypeData.filter(
+      (d) => d.type_offre === choixType
+    );
+
+    const plot = window.Plot.plot({
+      title: "Accessibilité culturelle selon le type d'offre (2025)",
+      subtitle: `Nombre d'habitants par ${
+        choixType === "physique" ? "lieu culturel physique" : "offre numérique"
+      } — Bordeaux vs Montpellier`,
+      height: 480,
+      marginLeft: 100,
+      marginBottom: 70,
+      marginTop: 80,
+      width: 560,
+      style: {
+        background: "linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)",
+        fontSize: "14px",
+        fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+        color: "#111111",
+      },
+      x: {
+        label: "Ville",
+        domain: ["Bordeaux", "Montpellier"],
+        tickSize: 0,
+      },
+      y: {
+        grid: true,
+        label:
+          choixType === "physique"
+            ? "↑ Habitants par offre culturelle physique"
+            : "↑ Habitants par offre culturelle numérique",
+        labelAnchor: "top",
+        labelOffset: 40,
+        tickFormat: "~s",
+      },
+      color: {
+        domain: ["Bordeaux", "Montpellier"],
+        range: [colors.Bordeaux, colors.Montpellier],
+        legend: true,
+        label: "Ville",
+      },
       marks: [
-        Plot.dot(penguins, {
-          x: "culmen_length_mm",
-          y: "culmen_depth_mm",
-          stroke: "species",
+        window.Plot.ruleY([0], { stroke: "#333", strokeWidth: 1.5 }),
+        window.Plot.barY(filteredData, {
+          x: "ville",
+          y: "habitants_par_lieu",
+          fill: "ville",
+          rx: 8,
+          tip: {
+            fill: "#ffffff",
+            stroke: (d) =>
+              d.ville === "Bordeaux" ? colors.Bordeaux : colors.Montpellier,
+            strokeWidth: 3,
+            fontSize: "14px",
+          },
+          title: (d) =>
+            `🏙️ ${d.ville} — ${
+              d.type_offre === "physique" ? "Offre physique" : "Offre numérique"
+            }\n\n👥 ${d.habitants_par_lieu
+              ?.toFixed(0)
+              .replace(/\B(?=(\d{3})+(?!\d))/g, " ")} habitants/${
+              d.type_offre === "physique" ? "lieu" : "offre"
+            }\n🏛️ ${d.lieux} ${d.type_offre === "physique" ? "lieu" : "offre"}${
+              d.lieux > 1 ? "s" : ""
+            }`,
+        }),
+        window.Plot.text(filteredData, {
+          x: "ville",
+          y: (d) => d.habitants_par_lieu + d.habitants_par_lieu * 0.04,
+          text: (d) => d.habitants_par_lieu.toLocaleString("fr-FR"),
+          textAnchor: "middle",
+          fill: "#111111",
+          fontSize: 18,
+          fontWeight: "700",
+          stroke: "#ffffff",
+          strokeWidth: 3,
+          paintOrder: "stroke",
+        }),
+        window.Plot.text(filteredData, {
+          x: "ville",
+          y: (d) => d.habitants_par_lieu * 0.5,
+          text: (d) =>
+            `${d.lieux} ${choixType === "physique" ? "lieu" : "offre"}${
+              d.lieux > 1 ? (choixType === "physique" ? "x" : "s") : ""
+            }`,
+          textAnchor: "middle",
+          fill: "#ffffff",
+          fontSize: 15,
+          fontWeight: "600",
+          opacity: 0.95,
         }),
       ],
-    }}
-  />
-</Layout>
+    });
+
+    container.appendChild(plot);
+  }
+
+  const radioInputs = document.querySelectorAll('input[name="choixType"]');
+  radioInputs.forEach((input) => {
+    input.addEventListener("change", (e) => {
+      renderChart((e.target as HTMLInputElement).value);
+    });
+  });
+
+  function initChart() {
+    if (window.Plot) {
+      renderChart("physique");
+    } else {
+      setTimeout(initChart, 100);
+    }
+  }
+
+  initChart();
+</script>
+
+<script
+  type="application/json"
+  id="data-lieux"
+  set:html={JSON.stringify(LieuxParVilleType)}
+/>

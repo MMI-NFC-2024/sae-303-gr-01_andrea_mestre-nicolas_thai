@@ -1,2 +1,37 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="8" fill="white" opacity="0.8"/><circle cx="24" cy="24" r="4" fill="black"/></svg>')
+        24 24,
+      auto;
+  }
+
+  body {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 1rem;
+    line-height: 1.7;
+    letter-spacing: -0.01em;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Lora", "Georgia", serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  a,
+  button {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="16" fill="white" opacity="0.9"/><circle cx="32" cy="32" r="8" fill="black"/></svg>')
+        32 32,
+      pointer;
+  }
+}
