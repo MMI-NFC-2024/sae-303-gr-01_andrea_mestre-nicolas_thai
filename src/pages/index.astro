@@ -36,6 +36,66 @@ const LieuxParVilleType = ["Bordeaux", "Montpellier", "Talence"]
     });
   })
   .filter((d) => d.habitants_par_lieu !== null);
+
+const DataBordeaux = data.filter((d) => d.ville === "Bordeaux");
+const DataMontpellier = data.filter((d) => d.ville === "Montpellier");
+
+const typesEquipements = Array.from(
+  new Set(
+    data
+      .filter((d) => d.type_offre === "physique" && d.type_equipement)
+      .map((d) => d.type_equipement)
+  )
+).sort();
+
+const butterflyDataComplete = typesEquipements
+  .map((type) => {
+    const bordeauxCount = DataBordeaux.filter(
+      (d) => d.type_equipement === type && d.type_offre === "physique"
+    ).length;
+
+    const montpellierCount = DataMontpellier.filter(
+      (d) => d.type_equipement === type && d.type_offre === "physique"
+    ).length;
+
+    return [
+      {
+        type: type,
+        count: -bordeauxCount,
+        ville: "Bordeaux",
+        countAbs: bordeauxCount,
+      },
+      {
+        type: type,
+        count: montpellierCount,
+        ville: "Montpellier",
+        countAbs: montpellierCount,
+      },
+    ];
+  })
+  .flat()
+  .filter((d) => d.countAbs > 0);
+
+const totalsByType = new Map();
+butterflyDataComplete.forEach((d) => {
+  const current = totalsByType.get(d.type) || 0;
+  totalsByType.set(d.type, current + d.countAbs);
+});
+
+const equipementsPertinents = Array.from(totalsByType.entries())
+  .filter(([type, count]) => count >= 3)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 10)
+  .map(([type]) => type);
+
+const butterflyData = butterflyDataComplete.filter((d) =>
+  equipementsPertinents.includes(d.type)
+);
+
+const equipementsDomain = Array.from(totalsByType.entries())
+  .filter(([type]) => equipementsPertinents.includes(type))
+  .sort((a, b) => b[1] - a[1])
+  .map(([type]) => type);
 ---
 
 <Layout>
@@ -303,6 +363,188 @@ const LieuxParVilleType = ["Bordeaux", "Montpellier", "Talence"]
     </div>
   </section>
 
+  <section
+    id="chapitre-03"
+    class="snap-section bg-[#F2F2F2] min-h-screen flex items-center"
+  >
+    <div class="container mx-auto max-w-7xl px-6 py-24">
+      <div class="fade-in-section">
+        <div class="max-w-5xl mb-16">
+          <div class="text-xs uppercase tracking-[0.2em] text-gray-500 mb-6">
+            Chapitre 03
+          </div>
+          <h2 class="text-4xl md:text-6xl font-serif mb-6 text-[#111111]">
+            Top 10 des équipements culturels
+          </h2>
+          <p class="text-lg text-gray-700 leading-relaxed">
+            Après avoir établi la densité globale et la répartition spatiale de
+            l'offre, il est crucial de comprendre ce qui compose réellement
+            l'offre physique de Bordeaux et Montpellier. Cette troisième
+            visualisation nous permet de passer à la structure même du
+            patrimoine culturel. En comparant le nombre d'équipements dans les
+            dix catégories principales, nous pouvons déterminer les domaines
+            d'investissement culturels prioritaires de chaque métropole.
+          </p>
+        </div>
+
+        <div class="bg-white rounded-2xl p-8 shadow-sm mb-12">
+          <PlotFigure
+            options={{
+              title: "Top 10 des équipements culturels (2025)",
+              subtitle:
+                "Comparaison Bordeaux vs Montpellier — Équipements avec minimum 3 lieux",
+              marginLeft: 180,
+              marginRight: 220,
+              marginBottom: 70,
+              marginTop: 90,
+              width: 1200,
+              height: 480,
+              style: {
+                background: "linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)",
+                fontSize: 14,
+                fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+                color: "#1a1a1a",
+              },
+              x: {
+                label:
+                  "← Bordeaux                                    Montpellier →",
+                labelAnchor: "center",
+                labelOffset: 45,
+                tickFormat: (d) => Math.abs(d),
+                grid: true,
+                nice: true,
+                line: true,
+                domain: [
+                  -Math.min(
+                    150,
+                    Math.max(
+                      ...butterflyData
+                        .filter((d) => d.ville === "Bordeaux")
+                        .map((d) => Math.abs(d.count))
+                    ) * 1.1
+                  ),
+                  Math.min(
+                    150,
+                    Math.max(
+                      ...butterflyData
+                        .filter((d) => d.ville === "Montpellier")
+                        .map((d) => d.count)
+                    ) * 1.1
+                  ),
+                ],
+                clamp: true,
+              },
+              y: {
+                label: null,
+                domain: equipementsDomain,
+                tickSize: 0,
+                tickPadding: 12,
+                fontSize: 13,
+              },
+              color: {
+                domain: ["Bordeaux", "Montpellier"],
+                range: [colors.Bordeaux, colors.Montpellier],
+                legend: true,
+                label: "Ville",
+                marginLeft: 100,
+              },
+              marks: [
+                Plot.barX(butterflyData, {
+                  x: "count",
+                  y: "type",
+                  fill: "ville",
+                  insetTop: 3,
+                  insetBottom: 3,
+                  rx: 6,
+                  tip: true,
+                  title: (d) =>
+                    `🏙️ ${d.ville}\n🏛️ ${d.type}\n📊 ${d.countAbs} équipement${
+                      d.countAbs > 1 ? "s" : ""
+                    }`,
+                }),
+                Plot.ruleX([0], {
+                  stroke: "#1a1a1a",
+                  strokeWidth: 3,
+                }),
+                Plot.text(
+                  butterflyData.filter(
+                    (d) => d.ville === "Bordeaux" && d.countAbs > 0
+                  ),
+                  {
+                    x: (d) => Math.max(d.count, -150),
+                    y: "type",
+                    text: (d) => d.countAbs.toString(),
+                    dx: -12,
+                    fill: "#ffffff",
+                    fontSize: 12,
+                    fontWeight: "700",
+                  }
+                ),
+                Plot.text(
+                  butterflyData.filter(
+                    (d) => d.ville === "Montpellier" && d.countAbs > 0
+                  ),
+                  {
+                    x: (d) => Math.min(d.count, 150),
+                    y: "type",
+                    text: (d) => d.countAbs.toString(),
+                    dx: 12,
+                    fill: "#ffffff",
+                    fontSize: 12,
+                    fontWeight: "700",
+                  }
+                ),
+                Plot.text(
+                  equipementsDomain.map((type) => {
+                    const dataType = butterflyData.filter(
+                      (d) => d.type === type
+                    );
+                    const bordeaux =
+                      dataType.find((d) => d.ville === "Bordeaux")?.countAbs ||
+                      0;
+                    const montpellier =
+                      dataType.find((d) => d.ville === "Montpellier")
+                        ?.countAbs || 0;
+                    const total = bordeaux + montpellier;
+                    return {
+                      type,
+                      total,
+                      label: `Total: ${total}`,
+                    };
+                  }),
+                  {
+                    x: 150,
+                    y: "type",
+                    text: "label",
+                    dx: 55,
+                    textAnchor: "start",
+                    fill: "#495057",
+                    fontSize: 12,
+                    fontWeight: "700",
+                    stroke: "#ffffff",
+                    strokeWidth: 2,
+                    paintOrder: "stroke",
+                  }
+                ),
+              ],
+            }}
+          />
+        </div>
+
+        <div class="bg-white rounded-2xl p-8 border-l-4 border-[#111111]">
+          <p class="text-lg text-gray-700 leading-relaxed">
+            Ce graphique révèle les forces historiques des deux villes et met en
+            lumière les secteurs qui soutiennent l'accessibilité physique
+            observée précédemment. L'analyse de la structure de l'offre physique
+            renforce l'idée que les deux villes, en particulier Bordeaux,
+            s'appuient fortement sur leur héritage patrimonial, mais avec des
+            différences notables dans la manière dont cette offre est maillée.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <div
     id="progress-indicator"
     class="fixed right-8 top-1/2 -translate-y-1/2 z-50 hidden md:flex flex-col gap-3 opacity-0 transition-opacity duration-500"
@@ -315,6 +557,10 @@ const LieuxParVilleType = ["Bordeaux", "Montpellier", "Talence"]
       href="#chapitre-01"
       class="progress-dot w-2 h-2 rounded-full bg-black/30 hover:bg-black/60 transition-all duration-300"
       data-section="1"></a>
+    <a
+      href="#chapitre-03"
+      class="progress-dot w-2 h-2 rounded-full bg-black/30 hover:bg-black/60 transition-all duration-300"
+      data-section="2"></a>
   </div>
 </Layout>
 
@@ -390,6 +636,7 @@ const LieuxParVilleType = ["Bordeaux", "Montpellier", "Talence"]
   const storytellingSections = [
     document.getElementById("intro"),
     document.getElementById("chapitre-01"),
+    document.getElementById("chapitre-03"),
   ];
   const progressIndicator = document.getElementById("progress-indicator");
   const progressDots = document.querySelectorAll(".progress-dot");
