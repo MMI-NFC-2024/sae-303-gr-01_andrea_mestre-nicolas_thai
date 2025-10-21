@@ -912,28 +912,143 @@ normalizedRadarDimensions.forEach((d, i) => {
     </div>
   </section>
 
-  <div
-    id="progress-indicator"
-    class="fixed right-8 top-1/2 -translate-y-1/2 z-50 hidden md:flex flex-col gap-3 opacity-0 transition-opacity duration-500"
+  <section
+    id="conclusion"
+    class="snap-section bg-[#F2F2F2] min-h-screen flex items-center"
   >
-    <a
-      href="#intro"
-      class="progress-dot w-2 h-2 rounded-full bg-black/30 hover:bg-black/60 transition-all duration-300"
-      data-section="0"></a>
-    <a
-      href="#chapitre-01"
-      class="progress-dot w-2 h-2 rounded-full bg-black/30 hover:bg-black/60 transition-all duration-300"
-      data-section="1"></a>
-    <a
-      href="#chapitre-03"
-      class="progress-dot w-2 h-2 rounded-full bg-black/30 hover:bg-black/60 transition-all duration-300"
-      data-section="2"></a>
-    <a
-      href="#chapitre-04"
-      class="progress-dot w-2 h-2 rounded-full bg-black/30 hover:bg-black/60 transition-all duration-300"
-      data-section="3"></a>
-  </div>
+    <div class="container mx-auto max-w-4xl px-6 py-24">
+      <div class="space-y-8 fade-in-section">
+        <div class="text-xs uppercase tracking-[0.3em] text-gray-500">
+          Conclusion
+        </div>
+
+        <h2
+          class="text-4xl md:text-5xl lg:text-6xl font-serif text-[#111111] leading-tight"
+        >
+          Deux visions, un même territoire
+        </h2>
+
+        <div class="prose prose-lg max-w-none">
+          <p class="text-xl text-gray-700 leading-relaxed mb-6">
+            À travers cette exploration comparative, une réalité s'impose : <span
+              class="font-semibold text-[#111111]"
+              >Bordeaux et Montpellier incarnent deux modèles culturels
+              complémentaires</span
+            > qui répondent chacun à des enjeux différents du territoire français.
+          </p>
+
+          <p class="text-xl text-gray-700 leading-relaxed mb-6">
+            <span class="text-[#0077B6] font-semibold">Bordeaux</span>, forte de
+            ses 407 monuments classés et de son statut UNESCO, a fait le choix
+            stratégique de capitaliser sur son <span
+              class="font-semibold text-[#111111]"
+              >héritage patrimonial exceptionnel</span
+            >. Cette approche se traduit par une densité remarquable
+            d'équipements culturels physiques (1 647 habitants par lieu),
+            positionnant la ville comme un conservatoire vivant du patrimoine
+            français. Toutefois, cette excellence historique s'accompagne d'un
+            retard notable dans la transition numérique, avec une offre digitale
+            51,5 fois moins accessible que son offre physique.
+          </p>
+
+          <p class="text-xl text-gray-700 leading-relaxed mb-6">
+            <span class="text-[#F77F00] font-semibold">Montpellier</span>, de
+            son côté, propose un modèle radicalement différent. Avec 51
+            festivals et une innovation numérique deux fois plus accessible que
+            Bordeaux, la métropole méditerranéenne mise sur la <span
+              class="font-semibold text-[#111111]"
+              >diversité, la jeunesse et l'expérimentation</span
+            >. Son profil culturel plus équilibré traduit une volonté
+            d'ouverture et d'adaptation aux nouveaux modes de consommation
+            culturelle, faisant d'elle un laboratoire de la culture
+            contemporaine.
+          </p>
+
+          <p class="text-xl text-gray-700 leading-relaxed">
+            Ces deux trajectoires ne sont pas antagonistes mais <span
+              class="font-semibold text-[#111111]">complémentaires</span
+            >. Elles illustrent la richesse du paysage culturel français,
+            capable de conjuguer préservation patrimoniale et innovation
+            numérique, profondeur historique et dynamisme événementiel. Dans un
+            contexte de transformation digitale accélérée, la question n'est
+            plus de savoir quel modèle l'emporte, mais comment ces deux visions
+            peuvent s'enrichir mutuellement pour construire la culture de
+            demain.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6 mt-12">
+          <div
+            class="bg-gradient-to-br from-[#0077B6]/5 to-[#0077B6]/10 rounded-2xl p-8 border-l-4 border-[#0077B6]"
+          >
+            <h3 class="text-2xl font-serif text-[#111111] mb-4">Bordeaux</h3>
+            <p class="text-gray-700 leading-relaxed text-lg">
+              L'excellence patrimoniale comme pilier d'une identité culturelle
+              forte et d'un rayonnement international.
+            </p>
+          </div>
+
+          <div
+            class="bg-gradient-to-br from-[#F77F00]/5 to-[#F77F00]/10 rounded-2xl p-8 border-l-4 border-[#F77F00]"
+          >
+            <h3 class="text-2xl font-serif text-[#111111] mb-4">Montpellier</h3>
+            <p class="text-gray-700 leading-relaxed text-lg">
+              La diversité et l'innovation comme moteurs d'une culture
+              accessible et tournée vers l'avenir.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-12">
+        <a
+          href="#"
+          class="inline-flex items-center gap-2 text-sm uppercase tracking-wider text-gray-500 hover:text-[#111111] transition-colors"
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+          </svg>
+          Retour en haut
+        </a>
+      </div>
+    </div>
+  </section>
 </Layout>
+
+<div
+  id="progress-indicator"
+  class="fixed right-8 top-1/2 -translate-y-1/2 z-50 hidden md:flex flex-col gap-3 opacity-0 transition-opacity duration-500"
+>
+  <a
+    href="#intro"
+    class="progress-dot w-2 h-2 rounded-full bg-black/30 hover:bg-black/60 transition-all duration-300"
+    data-section="0"></a>
+  <a
+    href="#chapitre-01"
+    class="progress-dot w-2 h-2 rounded-full bg-black/30 hover:bg-black/60 transition-all duration-300"
+    data-section="1"></a>
+  <a
+    href="#chapitre-03"
+    class="progress-dot w-2 h-2 rounded-full bg-black/30 hover:bg-black/60 transition-all duration-300"
+    data-section="2"></a>
+  <a
+    href="#chapitre-04"
+    class="progress-dot w-2 h-2 rounded-full bg-black/30 hover:bg-black/60 transition-all duration-300"
+    data-section="3"></a>
+  <a
+    href="#conclusion"
+    class="progress-dot w-2 h-2 rounded-full bg-black/30 hover:bg-black/60 transition-all duration-300"
+    data-section="4"></a>
+</div>
 
 <style>
   :global(html) {
@@ -1009,6 +1124,7 @@ normalizedRadarDimensions.forEach((d, i) => {
     document.getElementById("chapitre-01"),
     document.getElementById("chapitre-03"),
     document.getElementById("chapitre-04"),
+    document.getElementById("conclusion"),
   ];
   const progressIndicator = document.getElementById("progress-indicator");
   const progressDots = document.querySelectorAll(".progress-dot");
