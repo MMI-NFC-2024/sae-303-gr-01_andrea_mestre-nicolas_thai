@@ -1,208 +1,61 @@
 ---
 import SimpleLayout from "../layouts/SimpleLayout.astro";
 import PlotFigure from "../components/PlotFigure.astro";
+import ButterflyChart from "../components/charts/ButterflyChart.astro";
+import RadarChart from "../components/charts/RadarChart.astro";
 import * as Plot from "@observablehq/plot";
 import data from "../assets/DataCulturelles2025.json";
 import communes from "../assets/communes.json";
 
-const colors = {
-  Bordeaux: "#11273f",
-  Montpellier: "#C45500",
-};
+// Imports des utilitaires et services
+import { CITY_COLORS, CITY_CODES, MAIN_CITIES } from "../constants";
+import { 
+  filterByCity, 
+  getUniqueEquipmentTypes,
+  createCityGeoFeatures,
+  calculateLieuxParVilleType,
+  calculateButterflyData,
+  filterRelevantEquipments
+} from "../utils/dataUtils";
+import { 
+  normalizeRadarDimensions,
+  createEquipmentDomain 
+} from "../utils/chartConfig";
+import { generateRadarDimensions } from "../services/culturalDataService";
 
-const bordeauxGeo = {
-  type: "FeatureCollection",
-  features: communes.features.filter(
-    (d) =>
-      d.properties.code === "33063" ||
-      d.properties.nom?.toLowerCase() === "bordeaux"
-  ),
-};
+// Configuration des couleurs (alias pour compatibilité)
+const colors = CITY_COLORS;
 
-const montpellierGeo = {
-  type: "FeatureCollection",
-  features: communes.features.filter(
-    (d) =>
-      d.properties.code === "34172" ||
-      d.properties.nom?.toLowerCase() === "montpellier"
-  ),
-};
+// Données géographiques
+const bordeauxGeo = createCityGeoFeatures(communes, CITY_CODES.Bordeaux, "bordeaux");
+const montpellierGeo = createCityGeoFeatures(communes, CITY_CODES.Montpellier, "montpellier");
 
-const populations = {
-  Bordeaux: 1018000,
-  Montpellier: 487000,
-};
+// Données filtrées
+const DataBordeaux = filterByCity(data, "Bordeaux");
+const DataMontpellier = filterByCity(data, "Montpellier");
 
-const LieuxParVilleType = ["Bordeaux", "Montpellier"]
-  .flatMap((ville) => {
-    const typesOffre = ["physique", "numérique"];
-    return typesOffre.map((type_offre) => {
-      const lieux = data.filter(
-        (d) => d.ville === ville && d.type_offre === type_offre
-      ).length;
-      const pop = populations[ville];
+// Calculs principaux
+const LieuxParVilleType = calculateLieuxParVilleType(data, [...MAIN_CITIES]);
+const typesEquipements = getUniqueEquipmentTypes(data);
 
-      return {
-        ville,
-        type_offre,
-        lieux,
-        habitants_par_lieu: pop && lieux > 0 ? Math.round(pop / lieux) : null,
-      };
-    });
-  })
-  .filter((d) => d.habitants_par_lieu !== null);
+// Données butterfly
+const butterflyDataComplete = calculateButterflyData(DataBordeaux, DataMontpellier, typesEquipements);
+const equipementsPertinents = filterRelevantEquipments(butterflyDataComplete);
+const butterflyData = butterflyDataComplete.filter((d) => equipementsPertinents.includes(d.type));
 
-const DataBordeaux = data.filter((d) => d.ville === "Bordeaux");
-const DataMontpellier = data.filter((d) => d.ville === "Montpellier");
-
-const typesEquipements = Array.from(
-  new Set(
-    data
-      .filter((d) => d.type_offre === "physique" && d.type_equipement)
-      .map((d) => d.type_equipement)
-  )
-).sort();
-
-const butterflyDataComplete = typesEquipements
-  .map((type) => {
-    const bordeauxCount = DataBordeaux.filter(
-      (d) => d.type_equipement === type && d.type_offre === "physique"
-    ).length;
-
-    const montpellierCount = DataMontpellier.filter(
-      (d) => d.type_equipement === type && d.type_offre === "physique"
-    ).length;
-
-    return [
-      {
-        type: type,
-        count: -bordeauxCount,
-        ville: "Bordeaux",
-        countAbs: bordeauxCount,
-      },
-      {
-        type: type,
-        count: montpellierCount,
-        ville: "Montpellier",
-        countAbs: montpellierCount,
-      },
-    ];
-  })
-  .flat()
-  .filter((d) => d.countAbs > 0);
-
-const totalsByType = new Map();
+// Calcul du domaine pour les équipements
+const totalsByType = new Map<string, number>();
 butterflyDataComplete.forEach((d) => {
   const current = totalsByType.get(d.type) || 0;
   totalsByType.set(d.type, current + d.countAbs);
 });
+const equipementsDomain = createEquipmentDomain(totalsByType, equipementsPertinents);
 
-const equipementsPertinents = Array.from(totalsByType.entries())
-  .filter(([type, count]) => count >= 3)
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 10)
-  .map(([type]) => type);
+// Dimensions radar
+const radarDimensions = generateRadarDimensions(data);
+const normalizedRadarDimensions = normalizeRadarDimensions(radarDimensions);
 
-const butterflyData = butterflyDataComplete.filter((d) =>
-  equipementsPertinents.includes(d.type)
-);
-
-const equipementsDomain = Array.from(totalsByType.entries())
-  .filter(([type]) => equipementsPertinents.includes(type))
-  .sort((a, b) => b[1] - a[1])
-  .map(([type]) => type);
-
-const nbPatrimoineBdx = DataBordeaux.filter(
-  (d) =>
-    d.type_equipement?.toLowerCase().includes("musée") ||
-    d.type_equipement?.toLowerCase().includes("monument")
-).length;
-
-const nbPatrimoineMtp = DataMontpellier.filter(
-  (d) =>
-    d.type_equipement?.toLowerCase().includes("musée") ||
-    d.type_equipement?.toLowerCase().includes("monument")
-).length;
-
-const nbBibliosBdx = DataBordeaux.filter((d) =>
-  d.type_equipement?.toLowerCase().includes("bibliothèque")
-).length;
-
-const nbBibliosMtp = DataMontpellier.filter((d) =>
-  d.type_equipement?.toLowerCase().includes("bibliothèque")
-).length;
-
-const nbFestivalsBdx = DataBordeaux.filter((d) =>
-  d.type_equipement?.toLowerCase().includes("festival")
-).length;
-
-const nbFestivalsMtp = DataMontpellier.filter((d) =>
-  d.type_equipement?.toLowerCase().includes("festival")
-).length;
-
-const nbNumBdx = DataBordeaux.filter(
-  (d) => d.type_offre === "numérique"
-).length;
-const nbNumMtp = DataMontpellier.filter(
-  (d) => d.type_offre === "numérique"
-).length;
-
-const nbPhysiqueBdx = DataBordeaux.filter(
-  (d) => d.type_offre === "physique"
-).length;
-const nbPhysiqueMtp = DataMontpellier.filter(
-  (d) => d.type_offre === "physique"
-).length;
-
-const diversiteBdx = new Set(DataBordeaux.map((d) => d.type_equipement)).size;
-const diversiteMtp = new Set(DataMontpellier.map((d) => d.type_equipement))
-  .size;
-
-const radarDimensions = [
-  {
-    label: "Patrimoine\n(Musées + Monuments)\npour 100k hab",
-    bordeaux: (nbPatrimoineBdx / populations.Bordeaux) * 100000,
-    montpellier: (nbPatrimoineMtp / populations.Montpellier) * 100000,
-  },
-  {
-    label: "Bibliothèques\n(pour 100k hab)",
-    bordeaux: (nbBibliosBdx / populations.Bordeaux) * 100000,
-    montpellier: (nbBibliosMtp / populations.Montpellier) * 100000,
-  },
-  {
-    label: "Festivals\n(pour 100k hab)",
-    bordeaux: (nbFestivalsBdx / populations.Bordeaux) * 100000,
-    montpellier: (nbFestivalsMtp / populations.Montpellier) * 100000,
-  },
-  {
-    label: "Innovation\nnumérique\n(pour 100k hab)",
-    bordeaux: (nbNumBdx / populations.Bordeaux) * 100000,
-    montpellier: (nbNumMtp / populations.Montpellier) * 100000,
-  },
-  {
-    label: "Accessibilité\nphysique globale\n(lieux/1000 hab)",
-    bordeaux: (nbPhysiqueBdx / populations.Bordeaux) * 1000,
-    montpellier: (nbPhysiqueMtp / populations.Montpellier) * 1000,
-  },
-  {
-    label: "Diversité\ndes équipements\n(types uniques)",
-    bordeaux: diversiteBdx,
-    montpellier: diversiteMtp,
-  },
-];
-
-const normalizedRadarDimensions = radarDimensions.map((d) => {
-  const maxDimension = Math.max(d.bordeaux, d.montpellier);
-  return {
-    label: d.label,
-    bordeaux: (d.bordeaux / maxDimension) * 100,
-    montpellier: (d.montpellier / maxDimension) * 100,
-    bordeauxRaw: d.bordeaux,
-    montpellierRaw: d.montpellier,
-  };
-});
-
-const radarData = [];
+const radarData: any[] = [];
 const n = normalizedRadarDimensions.length;
 const angleStep = (2 * Math.PI) / n;
 
@@ -482,142 +335,10 @@ normalizedRadarDimensions.forEach((d, i) => {
               Comparaison Bordeaux vs Montpellier — Équipements avec minimum 3
               lieux
             </p>
-            <PlotFigure
-              options={{
-                marginLeft: 180,
-                marginRight: 220,
-                marginBottom: 70,
-                marginTop: 50,
-                width: 1200,
-                height: 480,
-                style: {
-                  background:
-                    "linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)",
-                  fontSize: 14,
-                  fontFamily: "Inter, system-ui, -apple-system, sans-serif",
-                  color: "#1a1a1a",
-                },
-                x: {
-                  label:
-                    "← Bordeaux                                    Montpellier →",
-                  labelAnchor: "center",
-                  labelOffset: 45,
-                  tickFormat: (d) => Math.abs(d),
-                  grid: true,
-                  nice: true,
-                  line: true,
-                  domain: [
-                    -Math.min(
-                      150,
-                      Math.max(
-                        ...butterflyData
-                          .filter((d) => d.ville === "Bordeaux")
-                          .map((d) => Math.abs(d.count))
-                      ) * 1.1
-                    ),
-                    Math.min(
-                      150,
-                      Math.max(
-                        ...butterflyData
-                          .filter((d) => d.ville === "Montpellier")
-                          .map((d) => d.count)
-                      ) * 1.1
-                    ),
-                  ],
-                  clamp: true,
-                },
-                y: {
-                  label: null,
-                  domain: equipementsDomain,
-                  tickSize: 0,
-                  tickPadding: 12,
-                  fontSize: 13,
-                },
-                color: {
-                  domain: ["Bordeaux", "Montpellier"],
-                  range: [colors.Bordeaux, colors.Montpellier],
-                  legend: true,
-                  label: "Ville",
-                  marginLeft: 100,
-                },
-                marks: [
-                  Plot.barX(butterflyData, {
-                    x: "count",
-                    y: "type",
-                    fill: "ville",
-                    insetTop: 3,
-                    insetBottom: 3,
-                    rx: 6,
-                    tip: true,
-                    title: (d) =>
-                      `${d.ville}\n${d.type}\n${d.countAbs} équipement${d.countAbs > 1 ? "s" : ""}`,
-                  }),
-                  Plot.ruleX([0], {
-                    stroke: "#1a1a1a",
-                    strokeWidth: 3,
-                  }),
-                  Plot.text(
-                    butterflyData.filter(
-                      (d) => d.ville === "Bordeaux" && d.countAbs > 0
-                    ),
-                    {
-                      x: (d) => Math.max(d.count, -150),
-                      y: "type",
-                      text: (d) => d.countAbs.toString(),
-                      dx: -12,
-                      fill: "#ffffff",
-                      fontSize: 12,
-                      fontWeight: "700",
-                    }
-                  ),
-                  Plot.text(
-                    butterflyData.filter(
-                      (d) => d.ville === "Montpellier" && d.countAbs > 0
-                    ),
-                    {
-                      x: (d) => Math.min(d.count, 150),
-                      y: "type",
-                      text: (d) => d.countAbs.toString(),
-                      dx: 12,
-                      fill: "#ffffff",
-                      fontSize: 12,
-                      fontWeight: "700",
-                    }
-                  ),
-                  Plot.text(
-                    equipementsDomain.map((type) => {
-                      const dataType = butterflyData.filter(
-                        (d) => d.type === type
-                      );
-                      const bordeaux =
-                        dataType.find((d) => d.ville === "Bordeaux")
-                          ?.countAbs || 0;
-                      const montpellier =
-                        dataType.find((d) => d.ville === "Montpellier")
-                          ?.countAbs || 0;
-                      const total = bordeaux + montpellier;
-                      return {
-                        type,
-                        total,
-                        label: `Total: ${total}`,
-                      };
-                    }),
-                    {
-                      x: 150,
-                      y: "type",
-                      text: "label",
-                      dx: 55,
-                      textAnchor: "start",
-                      fill: "#495057",
-                      fontSize: 12,
-                      fontWeight: "700",
-                      stroke: "#ffffff",
-                      strokeWidth: 2,
-                      paintOrder: "stroke",
-                    }
-                  ),
-                ],
-              }}
+            <ButterflyChart
+              butterflyData={butterflyData}
+              equipementsDomain={equipementsDomain}
+              colors={colors}
             />
           </div>
         </section>
@@ -656,164 +377,7 @@ normalizedRadarDimensions.forEach((d, i) => {
                 <span class="text-sm font-medium text-black">Montpellier</span>
               </div>
             </div>
-            <PlotFigure
-              options={{
-                width: 560,
-                height: 600,
-                margin: 80,
-                marginBottom: 100,
-                style: {
-                  background:
-                    "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-                  fontSize: 13,
-                  fontFamily: "Inter, system-ui, -apple-system, sans-serif",
-                  color: "#1a1a1a",
-                },
-                projection: {
-                  type: "identity",
-                  domain: {
-                    type: "MultiPoint",
-                    coordinates: [
-                      [-120, -120],
-                      [120, 120],
-                    ],
-                  },
-                },
-                marks: [
-                  ...[0, 20, 40, 60, 80, 100].map((r) =>
-                    Plot.circle([{ x: 0, y: 0 }], {
-                      x: "x",
-                      y: "y",
-                      r: r * 1.1,
-                      stroke: "#dee2e6",
-                      strokeWidth: r === 100 ? 2 : 1,
-                      strokeDasharray: r === 100 ? "none" : "4,4",
-                      fill: "none",
-                    })
-                  ),
-                  Plot.link(
-                    radarData.filter((d) => d.ville === "Bordeaux"),
-                    {
-                      x1: 0,
-                      y1: 0,
-                      x2: (d) => 110 * Math.cos(d.angle),
-                      y2: (d) => 110 * Math.sin(d.angle),
-                      stroke: "#adb5bd",
-                      strokeWidth: 1,
-                    }
-                  ),
-                  Plot.text(
-                    radarData.filter((d) => d.ville === "Bordeaux"),
-                    {
-                      x: (d) => 125 * Math.cos(d.angle),
-                      y: (d) => 125 * Math.sin(d.angle),
-                      text: "dimension",
-                      fontSize: 11,
-                      fontWeight: "600",
-                      fill: "#495057",
-                      textAnchor: "middle",
-                      lineWidth: 12,
-                      lineHeight: 1.2,
-                    }
-                  ),
-                  Plot.line(
-                    radarData
-                      .filter((d) => d.ville === "Bordeaux")
-                      .sort((a, b) => a.index - b.index)
-                      .concat([
-                        radarData.find(
-                          (d) => d.ville === "Bordeaux" && d.index === 0
-                        ),
-                      ]),
-                    {
-                      x: (d) => d.value * 1.1 * Math.cos(d.angle),
-                      y: (d) => d.value * 1.1 * Math.sin(d.angle),
-                      stroke: colors.Bordeaux,
-                      strokeWidth: 0,
-                      fill: colors.Bordeaux,
-                      fillOpacity: 0.25,
-                      curve: "linear-closed",
-                    }
-                  ),
-                  Plot.line(
-                    radarData
-                      .filter((d) => d.ville === "Montpellier")
-                      .sort((a, b) => a.index - b.index)
-                      .concat([
-                        radarData.find(
-                          (d) => d.ville === "Montpellier" && d.index === 0
-                        ),
-                      ]),
-                    {
-                      x: (d) => d.value * 1.1 * Math.cos(d.angle),
-                      y: (d) => d.value * 1.1 * Math.sin(d.angle),
-                      stroke: colors.Montpellier,
-                      strokeWidth: 0,
-                      fill: colors.Montpellier,
-                      fillOpacity: 0.25,
-                      curve: "linear-closed",
-                    }
-                  ),
-                  Plot.line(
-                    radarData
-                      .filter((d) => d.ville === "Bordeaux")
-                      .sort((a, b) => a.index - b.index)
-                      .concat([
-                        radarData.find(
-                          (d) => d.ville === "Bordeaux" && d.index === 0
-                        ),
-                      ]),
-                    {
-                      x: (d) => d.value * 1.1 * Math.cos(d.angle),
-                      y: (d) => d.value * 1.1 * Math.sin(d.angle),
-                      stroke: colors.Bordeaux,
-                      strokeWidth: 3,
-                      curve: "linear-closed",
-                    }
-                  ),
-                  Plot.line(
-                    radarData
-                      .filter((d) => d.ville === "Montpellier")
-                      .sort((a, b) => a.index - b.index)
-                      .concat([
-                        radarData.find(
-                          (d) => d.ville === "Montpellier" && d.index === 0
-                        ),
-                      ]),
-                    {
-                      x: (d) => d.value * 1.1 * Math.cos(d.angle),
-                      y: (d) => d.value * 1.1 * Math.sin(d.angle),
-                      stroke: colors.Montpellier,
-                      strokeWidth: 3,
-                      curve: "linear-closed",
-                    }
-                  ),
-                  Plot.text(radarData, {
-                    x: (d) => (d.value * 1.1 - 10) * Math.cos(d.angle),
-                    y: (d) => (d.value * 1.1 - 10) * Math.sin(d.angle),
-                    text: (d) => d.rawValue.toFixed(1),
-                    fill: (d) => colors[d.ville],
-                    fontSize: 10,
-                    fontWeight: "700",
-                    stroke: "#ffffff",
-                    strokeWidth: 2.5,
-                    paintOrder: "stroke",
-                    textAnchor: "middle",
-                  }),
-                  Plot.dot(radarData, {
-                    x: (d) => d.value * 1.1 * Math.cos(d.angle),
-                    y: (d) => d.value * 1.1 * Math.sin(d.angle),
-                    r: 5,
-                    fill: (d) => colors[d.ville],
-                    stroke: "#ffffff",
-                    strokeWidth: 2,
-                    tip: true,
-                    title: (d) =>
-                      `${d.ville}\n${d.dimension.replace(/\n/g, " ")}\nValeur: ${d.rawValue.toFixed(2)}`,
-                  }),
-                ],
-              }}
-            />
+            <RadarChart radarData={radarData} colors={colors} />
           </div>
         </section>
 

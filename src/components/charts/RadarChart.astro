@@ -1,0 +1,188 @@
+---
+/**
+ * Composant Radar Chart - Graphique radar pour comparer les profils culturels
+ * Affiche une comparaison multidimensionnelle entre Bordeaux et Montpellier
+ */
+import PlotFigure from "../PlotFigure.astro";
+import * as Plot from "@observablehq/plot";
+import type { RadarDataPoint } from "../../types";
+
+export interface Props {
+  /** Données du graphique radar */
+  radarData: RadarDataPoint[];
+  /** Configuration des couleurs */
+  colors: {
+    Bordeaux: string;
+    Montpellier: string;
+  };
+}
+
+const { radarData, colors } = Astro.props;
+---
+
+<PlotFigure
+  options={{
+    width: 560,
+    height: 600,
+    margin: 80,
+    marginBottom: 100,
+    style: {
+      background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+      fontSize: 13,
+      fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+      color: "#1a1a1a",
+    },
+    projection: {
+      type: "identity",
+      domain: {
+        type: "MultiPoint",
+        coordinates: [
+          [-120, -120],
+          [120, 120],
+        ],
+      },
+    },
+    marks: [
+      // Cercles concentriques de fond
+      ...[0, 20, 40, 60, 80, 100].map((r: number) =>
+        Plot.circle([{ x: 0, y: 0 }], {
+          x: "x",
+          y: "y",
+          r: r * 1.1,
+          stroke: "#dee2e6",
+          strokeWidth: r === 100 ? 2 : 1,
+          strokeDasharray: r === 100 ? "none" : "4,4",
+          fill: "none",
+        })
+      ),
+      // Lignes radiales
+      Plot.link(
+        radarData.filter((d) => d.ville === "Bordeaux"),
+        {
+          x1: 0,
+          y1: 0,
+          x2: (d: RadarDataPoint) => 110 * Math.cos(d.angle),
+          y2: (d: RadarDataPoint) => 110 * Math.sin(d.angle),
+          stroke: "#adb5bd",
+          strokeWidth: 1,
+        }
+      ),
+      // Labels des dimensions
+      Plot.text(
+        radarData.filter((d) => d.ville === "Bordeaux"),
+        {
+          x: (d: RadarDataPoint) => 125 * Math.cos(d.angle),
+          y: (d: RadarDataPoint) => 125 * Math.sin(d.angle),
+          text: "dimension",
+          fontSize: 11,
+          fontWeight: "600",
+          fill: "#495057",
+          textAnchor: "middle",
+          lineWidth: 12,
+          lineHeight: 1.2,
+        }
+      ),
+      // Zone remplie Bordeaux
+      Plot.line(
+        [
+          ...radarData
+            .filter((d) => d.ville === "Bordeaux")
+            .sort((a, b) => a.index - b.index),
+          radarData.find(
+            (d: RadarDataPoint) => d.ville === "Bordeaux" && d.index === 0
+          )!,
+        ],
+        {
+          x: (d: RadarDataPoint) => d.value * 1.1 * Math.cos(d.angle),
+          y: (d: RadarDataPoint) => d.value * 1.1 * Math.sin(d.angle),
+          stroke: colors.Bordeaux,
+          strokeWidth: 0,
+          fill: colors.Bordeaux,
+          fillOpacity: 0.25,
+          curve: "linear-closed",
+        }
+      ),
+      // Zone remplie Montpellier
+      Plot.line(
+        [
+          ...radarData
+            .filter((d) => d.ville === "Montpellier")
+            .sort((a, b) => a.index - b.index),
+          radarData.find(
+            (d: RadarDataPoint) => d.ville === "Montpellier" && d.index === 0
+          )!,
+        ],
+        {
+          x: (d: RadarDataPoint) => d.value * 1.1 * Math.cos(d.angle),
+          y: (d: RadarDataPoint) => d.value * 1.1 * Math.sin(d.angle),
+          stroke: colors.Montpellier,
+          strokeWidth: 0,
+          fill: colors.Montpellier,
+          fillOpacity: 0.25,
+          curve: "linear-closed",
+        }
+      ),
+      // Contour Bordeaux
+      Plot.line(
+        [
+          ...radarData
+            .filter((d) => d.ville === "Bordeaux")
+            .sort((a, b) => a.index - b.index),
+          radarData.find(
+            (d: RadarDataPoint) => d.ville === "Bordeaux" && d.index === 0
+          )!,
+        ],
+        {
+          x: (d: RadarDataPoint) => d.value * 1.1 * Math.cos(d.angle),
+          y: (d: RadarDataPoint) => d.value * 1.1 * Math.sin(d.angle),
+          stroke: colors.Bordeaux,
+          strokeWidth: 3,
+          curve: "linear-closed",
+        }
+      ),
+      // Contour Montpellier
+      Plot.line(
+        [
+          ...radarData
+            .filter((d) => d.ville === "Montpellier")
+            .sort((a, b) => a.index - b.index),
+          radarData.find(
+            (d: RadarDataPoint) => d.ville === "Montpellier" && d.index === 0
+          )!,
+        ],
+        {
+          x: (d: RadarDataPoint) => d.value * 1.1 * Math.cos(d.angle),
+          y: (d: RadarDataPoint) => d.value * 1.1 * Math.sin(d.angle),
+          stroke: colors.Montpellier,
+          strokeWidth: 3,
+          curve: "linear-closed",
+        }
+      ),
+      // Points de données
+      Plot.dot(radarData, {
+        x: (d: RadarDataPoint) => d.value * 1.1 * Math.cos(d.angle),
+        y: (d: RadarDataPoint) => d.value * 1.1 * Math.sin(d.angle),
+        r: 5,
+        fill: (d: RadarDataPoint) => colors[d.ville],
+        stroke: "#ffffff",
+        strokeWidth: 2,
+        tip: true,
+        title: (d: RadarDataPoint) =>
+          `${d.ville}\n${d.dimension.replace(/\n/g, " ")}\nValeur: ${d.rawValue.toFixed(2)}`,
+      }),
+      // Labels des valeurs
+      Plot.text(radarData, {
+        x: (d: RadarDataPoint) => (d.value * 1.1 - 10) * Math.cos(d.angle),
+        y: (d: RadarDataPoint) => (d.value * 1.1 - 10) * Math.sin(d.angle),
+        text: (d: RadarDataPoint) => d.rawValue.toFixed(1),
+        fill: (d: RadarDataPoint) => colors[d.ville],
+        fontSize: 10,
+        fontWeight: "700",
+        stroke: "#ffffff",
+        strokeWidth: 2.5,
+        paintOrder: "stroke",
+        textAnchor: "middle",
+      }),
+    ],
+  }}
+/>

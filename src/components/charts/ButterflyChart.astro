@@ -1,0 +1,157 @@
+---
+/**
+ * Composant Butterfly Chart - Graphique en papillon pour comparer les équipements
+ * Affiche une comparaison symétrique entre Bordeaux (gauche) et Montpellier (droite)
+ */
+import PlotFigure from "../PlotFigure.astro";
+import * as Plot from "@observablehq/plot";
+import type { ButterflyData } from "../../types";
+
+export interface Props {
+  /** Données du graphique butterfly */
+  butterflyData: ButterflyData[];
+  /** Domaine des équipements (ordre d'affichage) */
+  equipementsDomain: string[];
+  /** Configuration des couleurs */
+  colors: {
+    Bordeaux: string;
+    Montpellier: string;
+  };
+}
+
+const { butterflyData, equipementsDomain, colors } = Astro.props;
+---
+
+<PlotFigure
+  options={{
+    marginLeft: 180,
+    marginRight: 220,
+    marginBottom: 70,
+    marginTop: 50,
+    width: 1200,
+    height: 480,
+    style: {
+      background: "linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)",
+      fontSize: 14,
+      fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+      color: "#1a1a1a",
+    },
+    x: {
+      label: "← Bordeaux                                    Montpellier →",
+      labelAnchor: "center",
+      labelOffset: 45,
+      tickFormat: (d: number) => Math.abs(d),
+      grid: true,
+      nice: true,
+      line: true,
+      domain: [
+        -Math.min(
+          150,
+          Math.max(
+            ...butterflyData
+              .filter((d) => d.ville === "Bordeaux")
+              .map((d) => Math.abs(d.count))
+          ) * 1.1
+        ),
+        Math.min(
+          150,
+          Math.max(
+            ...butterflyData
+              .filter((d) => d.ville === "Montpellier")
+              .map((d) => d.count)
+          ) * 1.1
+        ),
+      ],
+      clamp: true,
+    },
+    y: {
+      label: null,
+      domain: equipementsDomain,
+      tickSize: 0,
+      tickPadding: 12,
+      fontSize: 13,
+    },
+    color: {
+      domain: ["Bordeaux", "Montpellier"],
+      range: [colors.Bordeaux, colors.Montpellier],
+      legend: true,
+      label: "Ville",
+      marginLeft: 100,
+    },
+    marks: [
+      Plot.barX(butterflyData, {
+        x: "count",
+        y: "type",
+        fill: "ville",
+        insetTop: 3,
+        insetBottom: 3,
+        rx: 6,
+        tip: true,
+        title: (d: ButterflyData) =>
+          `${d.ville}\n${d.type}\n${d.countAbs} équipement${
+            d.countAbs > 1 ? "s" : ""
+          }`,
+      }),
+      Plot.ruleX([0], {
+        stroke: "#1a1a1a",
+        strokeWidth: 3,
+      }),
+      Plot.text(
+        butterflyData.filter(
+          (d) => d.ville === "Bordeaux" && d.countAbs > 0
+        ),
+        {
+          x: (d: ButterflyData) => Math.max(d.count, -150),
+          y: "type",
+          text: (d: ButterflyData) => d.countAbs.toString(),
+          dx: -12,
+          fill: "#ffffff",
+          fontSize: 12,
+          fontWeight: "700",
+        }
+      ),
+      Plot.text(
+        butterflyData.filter(
+          (d) => d.ville === "Montpellier" && d.countAbs > 0
+        ),
+        {
+          x: (d: ButterflyData) => Math.min(d.count, 150),
+          y: "type",
+          text: (d: ButterflyData) => d.countAbs.toString(),
+          dx: 12,
+          fill: "#ffffff",
+          fontSize: 12,
+          fontWeight: "700",
+        }
+      ),
+      Plot.text(
+        equipementsDomain.map((type) => {
+          const dataType = butterflyData.filter((d) => d.type === type);
+          const bordeaux =
+            dataType.find((d) => d.ville === "Bordeaux")?.countAbs || 0;
+          const montpellier =
+            dataType.find((d) => d.ville === "Montpellier")?.countAbs || 0;
+          const total = bordeaux + montpellier;
+          return {
+            type,
+            total,
+            label: `Total: ${total}`,
+          };
+        }),
+        {
+          x: 150,
+          y: "type",
+          text: "label",
+          dx: 55,
+          textAnchor: "start",
+          fill: "#495057",
+          fontSize: 12,
+          fontWeight: "700",
+          stroke: "#ffffff",
+          strokeWidth: 2,
+          paintOrder: "stroke",
+        }
+      ),
+    ],
+  }}
+/>
