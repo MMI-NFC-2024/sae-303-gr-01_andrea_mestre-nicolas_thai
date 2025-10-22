@@ -11,7 +11,6 @@ import communes from "../assets/communes.json";
 import { CITY_COLORS, CITY_CODES, ALL_CITIES } from "../constants";
 import { 
   filterByCity, 
-  filterByOfferType,
   getUniqueEquipmentTypes,
   createCityGeoFeatures,
   calculateLieuxParVilleType,
@@ -33,7 +32,6 @@ const bordeauxGeo = createCityGeoFeatures(communes, CITY_CODES.Bordeaux, "bordea
 const montpellierGeo = createCityGeoFeatures(communes, CITY_CODES.Montpellier, "montpellier");
 
 // Données filtrées
-const DataCulturellesPhysiques2025 = filterByOfferType(data, "physique");
 const DataBordeaux = filterByCity(data, "Bordeaux");
 const DataMontpellier = filterByCity(data, "Montpellier");
 
@@ -364,13 +362,13 @@ const radarData = generateRadarData(normalizedRadarDimensions);
               id="btn-leaflet"
               class="px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-300 bg-[#111111] text-white"
             >
-              Vue Interactive
+              Vue Leaflet.JS
             </button>
             <button
               id="btn-geojson"
               class="px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-300 text-gray-700 hover:bg-gray-100"
             >
-              Vue Géographique
+              Vue GeoJSON
             </button>
           </div>
         </div>

@@ -47,24 +47,3 @@
     }
   }
 }
-
-/* Responsive chart containers */
-@layer components {
-  .chart-responsive {
-    @apply overflow-x-auto -mx-4 sm:mx-0;
-  }
-
-  .chart-responsive > * {
-    @apply min-w-[600px] sm:min-w-full;
-  }
-
-  /* Map containers */
-  .map-container {
-    @apply h-[400px] sm:h-[500px] lg:h-[600px];
-  }
-
-  /* Button responsive */
-  .btn-responsive {
-    @apply px-3 py-2 text-sm sm:px-4 sm:py-2.5 sm:text-base;
-  }
-}
