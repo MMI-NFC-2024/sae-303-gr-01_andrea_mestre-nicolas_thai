@@ -1,15 +1,244 @@
 ---
 import SimpleLayout from "../layouts/SimpleLayout.astro";
+import PlotFigure from "../components/PlotFigure.astro";
+import * as Plot from "@observablehq/plot";
+import data from "../assets/DataCulturelles2025.json";
+import communes from "../assets/communes.json";
+
+const colors = {
+  Bordeaux: "#11273f",
+  Montpellier: "#C45500",
+};
+
+const bordeauxGeo = {
+  type: "FeatureCollection",
+  features: communes.features.filter(
+    (d) =>
+      d.properties.code === "33063" ||
+      d.properties.nom?.toLowerCase() === "bordeaux"
+  ),
+};
+
+const montpellierGeo = {
+  type: "FeatureCollection",
+  features: communes.features.filter(
+    (d) =>
+      d.properties.code === "34172" ||
+      d.properties.nom?.toLowerCase() === "montpellier"
+  ),
+};
+
+const populations = {
+  Bordeaux: 1018000,
+  Montpellier: 487000,
+};
+
+const LieuxParVilleType = ["Bordeaux", "Montpellier"]
+  .flatMap((ville) => {
+    const typesOffre = ["physique", "numérique"];
+    return typesOffre.map((type_offre) => {
+      const lieux = data.filter(
+        (d) => d.ville === ville && d.type_offre === type_offre
+      ).length;
+      const pop = populations[ville];
+
+      return {
+        ville,
+        type_offre,
+        lieux,
+        habitants_par_lieu: pop && lieux > 0 ? Math.round(pop / lieux) : null,
+      };
+    });
+  })
+  .filter((d) => d.habitants_par_lieu !== null);
+
+const DataBordeaux = data.filter((d) => d.ville === "Bordeaux");
+const DataMontpellier = data.filter((d) => d.ville === "Montpellier");
+
+const typesEquipements = Array.from(
+  new Set(
+    data
+      .filter((d) => d.type_offre === "physique" && d.type_equipement)
+      .map((d) => d.type_equipement)
+  )
+).sort();
+
+const butterflyDataComplete = typesEquipements
+  .map((type) => {
+    const bordeauxCount = DataBordeaux.filter(
+      (d) => d.type_equipement === type && d.type_offre === "physique"
+    ).length;
+
+    const montpellierCount = DataMontpellier.filter(
+      (d) => d.type_equipement === type && d.type_offre === "physique"
+    ).length;
+
+    return [
+      {
+        type: type,
+        count: -bordeauxCount,
+        ville: "Bordeaux",
+        countAbs: bordeauxCount,
+      },
+      {
+        type: type,
+        count: montpellierCount,
+        ville: "Montpellier",
+        countAbs: montpellierCount,
+      },
+    ];
+  })
+  .flat()
+  .filter((d) => d.countAbs > 0);
+
+const totalsByType = new Map();
+butterflyDataComplete.forEach((d) => {
+  const current = totalsByType.get(d.type) || 0;
+  totalsByType.set(d.type, current + d.countAbs);
+});
+
+const equipementsPertinents = Array.from(totalsByType.entries())
+  .filter(([type, count]) => count >= 3)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 10)
+  .map(([type]) => type);
+
+const butterflyData = butterflyDataComplete.filter((d) =>
+  equipementsPertinents.includes(d.type)
+);
+
+const equipementsDomain = Array.from(totalsByType.entries())
+  .filter(([type]) => equipementsPertinents.includes(type))
+  .sort((a, b) => b[1] - a[1])
+  .map(([type]) => type);
+
+const nbPatrimoineBdx = DataBordeaux.filter(
+  (d) =>
+    d.type_equipement?.toLowerCase().includes("musée") ||
+    d.type_equipement?.toLowerCase().includes("monument")
+).length;
+
+const nbPatrimoineMtp = DataMontpellier.filter(
+  (d) =>
+    d.type_equipement?.toLowerCase().includes("musée") ||
+    d.type_equipement?.toLowerCase().includes("monument")
+).length;
+
+const nbBibliosBdx = DataBordeaux.filter((d) =>
+  d.type_equipement?.toLowerCase().includes("bibliothèque")
+).length;
+
+const nbBibliosMtp = DataMontpellier.filter((d) =>
+  d.type_equipement?.toLowerCase().includes("bibliothèque")
+).length;
+
+const nbFestivalsBdx = DataBordeaux.filter((d) =>
+  d.type_equipement?.toLowerCase().includes("festival")
+).length;
+
+const nbFestivalsMtp = DataMontpellier.filter((d) =>
+  d.type_equipement?.toLowerCase().includes("festival")
+).length;
+
+const nbNumBdx = DataBordeaux.filter(
+  (d) => d.type_offre === "numérique"
+).length;
+const nbNumMtp = DataMontpellier.filter(
+  (d) => d.type_offre === "numérique"
+).length;
+
+const nbPhysiqueBdx = DataBordeaux.filter(
+  (d) => d.type_offre === "physique"
+).length;
+const nbPhysiqueMtp = DataMontpellier.filter(
+  (d) => d.type_offre === "physique"
+).length;
+
+const diversiteBdx = new Set(DataBordeaux.map((d) => d.type_equipement)).size;
+const diversiteMtp = new Set(DataMontpellier.map((d) => d.type_equipement))
+  .size;
+
+const radarDimensions = [
+  {
+    label: "Patrimoine\n(Musées + Monuments)\npour 100k hab",
+    bordeaux: (nbPatrimoineBdx / populations.Bordeaux) * 100000,
+    montpellier: (nbPatrimoineMtp / populations.Montpellier) * 100000,
+  },
+  {
+    label: "Bibliothèques\n(pour 100k hab)",
+    bordeaux: (nbBibliosBdx / populations.Bordeaux) * 100000,
+    montpellier: (nbBibliosMtp / populations.Montpellier) * 100000,
+  },
+  {
+    label: "Festivals\n(pour 100k hab)",
+    bordeaux: (nbFestivalsBdx / populations.Bordeaux) * 100000,
+    montpellier: (nbFestivalsMtp / populations.Montpellier) * 100000,
+  },
+  {
+    label: "Innovation\nnumérique\n(pour 100k hab)",
+    bordeaux: (nbNumBdx / populations.Bordeaux) * 100000,
+    montpellier: (nbNumMtp / populations.Montpellier) * 100000,
+  },
+  {
+    label: "Accessibilité\nphysique globale\n(lieux/1000 hab)",
+    bordeaux: (nbPhysiqueBdx / populations.Bordeaux) * 1000,
+    montpellier: (nbPhysiqueMtp / populations.Montpellier) * 1000,
+  },
+  {
+    label: "Diversité\ndes équipements\n(types uniques)",
+    bordeaux: diversiteBdx,
+    montpellier: diversiteMtp,
+  },
+];
+
+const normalizedRadarDimensions = radarDimensions.map((d) => {
+  const maxDimension = Math.max(d.bordeaux, d.montpellier);
+  return {
+    label: d.label,
+    bordeaux: (d.bordeaux / maxDimension) * 100,
+    montpellier: (d.montpellier / maxDimension) * 100,
+    bordeauxRaw: d.bordeaux,
+    montpellierRaw: d.montpellier,
+  };
+});
+
+const radarData = [];
+const n = normalizedRadarDimensions.length;
+const angleStep = (2 * Math.PI) / n;
+
+normalizedRadarDimensions.forEach((d, i) => {
+  const angle = i * angleStep - Math.PI / 2;
+  radarData.push(
+    {
+      dimension: d.label,
+      angle: angle,
+      angleDeg: ((angle * 180) / Math.PI + 90) % 360,
+      value: d.bordeaux,
+      ville: "Bordeaux",
+      rawValue: d.bordeauxRaw,
+      index: i,
+    },
+    {
+      dimension: d.label,
+      angle: angle,
+      angleDeg: ((angle * 180) / Math.PI + 90) % 360,
+      value: d.montpellier,
+      ville: "Montpellier",
+      rawValue: d.montpellierRaw,
+      index: i,
+    }
+  );
+});
 ---
 
 <SimpleLayout
   title="Graphiques"
   description="Visualisations et graphiques de l'analyse comparative des offres culturelles entre Bordeaux et Montpellier."
 >
-  <div class="min-h-screen">
-    <div class="container mx-auto px-6 py-24 max-w-4xl">
+  <div class="min-h-screen bg-[#F2F2F2]">
+    <div class="container mx-auto px-6 py-24 max-w-7xl">
       <div class="space-y-8 mb-16">
-        <div class="text-xs uppercase tracking-[0.3em] text-gray-500">
+        <div class="text-sm uppercase tracking-[0.3em] text-gray-500">
           Visualisations
         </div>
 
@@ -19,92 +248,1398 @@ import SimpleLayout from "../layouts/SimpleLayout.astro";
           Graphiques et analyses
         </h1>
 
-        <p class="text-xl text-gray-700 leading-relaxed">
-          Exploration visuelle des données culturelles à travers différents
-          graphiques interactifs
+        <p class="text-xl text-gray-700 leading-relaxed max-w-3xl">
+          Exploration visuelle des données culturelles à travers les quatre
+          graphiques principaux de notre étude comparative
         </p>
       </div>
 
-      <div class="prose prose-lg max-w-none space-y-12">
-        <section>
+      <div class="space-y-16">
+        <section id="graphique-01" class="border-t border-gray-300 pt-12">
           <h2 class="text-3xl font-serif text-[#111111] mb-6">
-            Chapitres de l'analyse
+            01 — Accessibilité culturelle physique et numérique
           </h2>
-          <div class="space-y-8">
-            <div>
-              <h3 class="text-2xl font-serif text-[#111111] mb-3">
-                01 — Accessibilité culturelle
-              </h3>
-              <p class="text-lg text-gray-700 leading-relaxed">
-                Comparaison du nombre d'habitants par lieu culturel et offre
-                numérique dans chaque ville, visualisant la densité d'accès aux
-                équipements.
-              </p>
-            </div>
+          <p class="text-lg text-gray-700 leading-relaxed mb-8 max-w-3xl">
+            Comparaison du nombre d'habitants par lieu culturel selon le type
+            d'offre (physique ou numérique).
+          </p>
 
-            <div>
-              <h3 class="text-2xl font-serif text-[#111111] mb-3">
-                02 — Cartographie de l'offre
-              </h3>
-              <p class="text-lg text-gray-700 leading-relaxed">
-                Répartition géographique des équipements culturels physiques et
-                numériques à travers des cartes interactives des deux
-                métropoles.
-              </p>
+          <div class="bg-white rounded-2xl p-8 shadow-sm">
+            <div class="mb-6">
+              <label class="text-sm font-semibold text-[#111111] mb-3 block">
+                Type d'offre à afficher :
+              </label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="choixType"
+                    value="physique"
+                    checked
+                    class="radio radio-sm radio-custom"
+                  />
+                  <span class="text-gray-700">Physique</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="choixType"
+                    value="numérique"
+                    class="radio radio-sm radio-custom"
+                  />
+                  <span class="text-gray-700">Numérique</span>
+                </label>
+              </div>
             </div>
-
             <div>
-              <h3 class="text-2xl font-serif text-[#111111] mb-3">
-                03 — Top 10 des équipements
+              <h3 class="text-lg font-semibold text-black mb-1">
+                Accessibilité culturelle selon le type d'offre (2025)
               </h3>
-              <p class="text-lg text-gray-700 leading-relaxed">
-                Analyse comparative des dix principales catégories d'équipements
-                culturels, révélant les priorités de chaque ville.
+              <p id="chart-subtitle" class="text-sm text-black/80 mb-6">
+                Nombre d'habitants par lieu culturel physique — Bordeaux vs
+                Montpellier
               </p>
-            </div>
-
-            <div>
-              <h3 class="text-2xl font-serif text-[#111111] mb-3">
-                04 — Profils culturels multidimensionnels
-              </h3>
-              <p class="text-lg text-gray-700 leading-relaxed">
-                Vision systémique synthétisant six dimensions clés : patrimoine,
-                bibliothèques, festivals, innovation numérique, accessibilité et
-                diversité.
-              </p>
+              <div id="chart-container"></div>
             </div>
           </div>
         </section>
 
-        <section class="border-t border-gray-300 pt-12">
+        <section id="graphique-02" class="border-t border-gray-300 pt-12">
           <h2 class="text-3xl font-serif text-[#111111] mb-6">
-            Technologies de visualisation
+            02 — Cartographie de l'offre culturelle
           </h2>
-          <div class="space-y-4 text-lg text-gray-700 leading-relaxed">
-            <p>
-              <strong>Observable Plot</strong> pour les graphiques statistiques (barres,
-              radar, butterfly charts)
+          <p class="text-lg text-gray-700 leading-relaxed mb-8 max-w-3xl">
+            Répartition géographique des équipements culturels à travers des
+            cartes interactives.
+          </p>
+
+          <div class="flex justify-center mb-8">
+            <div class="bg-white rounded-xl p-2 shadow-sm inline-flex gap-2">
+              <button
+                id="btn-leaflet"
+                class="px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-300 bg-[#111111] text-white"
+              >
+                Vue Interactive
+              </button>
+              <button
+                id="btn-geojson"
+                class="px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-300 text-gray-700 hover:bg-gray-100"
+              >
+                Vue Géographique
+              </button>
+            </div>
+          </div>
+
+          <div id="leaflet-container" class="grid lg:grid-cols-2 gap-8 mb-8">
+            <div>
+              <h3 class="text-2xl font-serif text-[#11273f] mb-4">Bordeaux</h3>
+
+              <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label
+                    class="text-sm font-semibold text-[#111111] mb-2 block"
+                  >
+                    Type d'offre :
+                  </label>
+                  <select
+                    id="filtreTypeOffreBdx"
+                    class="select select-bordered w-full bg-white text-gray-700"
+                  >
+                    <option value="Toutes">Toutes les offres</option>
+                    <option value="physique">Physique</option>
+                    <option value="numérique">Numérique</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    class="text-sm font-semibold text-[#111111] mb-2 block"
+                  >
+                    Type d'équipement :
+                  </label>
+                  <select
+                    id="filtreEquipementBdx"
+                    class="select select-bordered w-full bg-white text-gray-700"
+                  >
+                    <option value="Tous">Tous les équipements</option>
+                  </select>
+                </div>
+              </div>
+
+              <div
+                id="map-bordeaux"
+                class="w-full h-[600px] rounded-xl shadow-lg"
+              >
+              </div>
+            </div>
+
+            <div>
+              <h3 class="text-2xl font-serif text-[#C45500] mb-4">
+                Montpellier
+              </h3>
+
+              <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label
+                    class="text-sm font-semibold text-[#111111] mb-2 block"
+                  >
+                    Type d'offre :
+                  </label>
+                  <select
+                    id="filtreTypeOffreMtp"
+                    class="select select-bordered w-full bg-white text-gray-700"
+                  >
+                    <option value="Toutes">Toutes les offres</option>
+                    <option value="physique">Physique</option>
+                    <option value="numérique">Numérique</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    class="text-sm font-semibold text-[#111111] mb-2 block"
+                  >
+                    Type d'équipement :
+                  </label>
+                  <select
+                    id="filtreEquipementMtp"
+                    class="select select-bordered w-full bg-white text-gray-700"
+                  >
+                    <option value="Tous">Tous les équipements</option>
+                  </select>
+                </div>
+              </div>
+
+              <div
+                id="map-montpellier"
+                class="w-full h-[600px] rounded-xl shadow-lg"
+              >
+              </div>
+            </div>
+          </div>
+
+          <div id="geojson-container" class="hidden">
+            <div class="mb-6 flex justify-center">
+              <div class="inline-flex flex-col gap-2">
+                <label class="text-sm font-semibold text-[#111111]">
+                  Type d'équipement :
+                </label>
+                <select
+                  id="filtreEquipementGeo"
+                  class="select select-bordered bg-white text-gray-700"
+                >
+                  <option value="Toutes">Toutes les offres</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8 mb-8">
+              <div>
+                <h3 class="text-2xl font-serif text-[#11273f] mb-4">
+                  Bordeaux
+                </h3>
+                <h4 class="text-base font-semibold text-black mb-1">
+                  Accessibilité culturelle à Bordeaux
+                </h4>
+                <p class="text-xs text-black/80 mb-4">
+                  Répartition géographique des lieux et initiatives culturelles
+                  — physiques et numériques • 2025
+                </p>
+                <div id="geo-bordeaux" class="w-full rounded-xl"></div>
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-serif text-[#C45500] mb-4">
+                  Montpellier
+                </h3>
+                <h4 class="text-base font-semibold text-black mb-1">
+                  Accessibilité culturelle à Montpellier
+                </h4>
+                <p class="text-xs text-black/80 mb-4">
+                  Répartition géographique des lieux et initiatives culturelles
+                  — physiques et numériques • 2025
+                </p>
+                <div id="geo-montpellier" class="w-full rounded-xl"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="graphique-03" class="border-t border-gray-300 pt-12">
+          <h2 class="text-3xl font-serif text-[#111111] mb-6">
+            03 — Top 10 des équipements culturels
+          </h2>
+          <p class="text-lg text-gray-700 leading-relaxed mb-8 max-w-3xl">
+            Analyse comparative des dix principales catégories d'équipements
+            culturels physiques.
+          </p>
+
+          <div class="bg-white rounded-2xl p-8 shadow-sm">
+            <h3 class="text-lg font-semibold text-black mb-1">
+              Top 10 des équipements culturels (2025)
+            </h3>
+            <p class="text-sm text-black/80 mb-6">
+              Comparaison Bordeaux vs Montpellier — Équipements avec minimum 3
+              lieux
             </p>
-            <p>
-              <strong>Leaflet</strong> pour les cartes interactives et la géolocalisation
-              des équipements
+            <PlotFigure
+              options={{
+                marginLeft: 180,
+                marginRight: 220,
+                marginBottom: 70,
+                marginTop: 50,
+                width: 1200,
+                height: 480,
+                style: {
+                  background:
+                    "linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)",
+                  fontSize: 14,
+                  fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+                  color: "#1a1a1a",
+                },
+                x: {
+                  label:
+                    "← Bordeaux                                    Montpellier →",
+                  labelAnchor: "center",
+                  labelOffset: 45,
+                  tickFormat: (d) => Math.abs(d),
+                  grid: true,
+                  nice: true,
+                  line: true,
+                  domain: [
+                    -Math.min(
+                      150,
+                      Math.max(
+                        ...butterflyData
+                          .filter((d) => d.ville === "Bordeaux")
+                          .map((d) => Math.abs(d.count))
+                      ) * 1.1
+                    ),
+                    Math.min(
+                      150,
+                      Math.max(
+                        ...butterflyData
+                          .filter((d) => d.ville === "Montpellier")
+                          .map((d) => d.count)
+                      ) * 1.1
+                    ),
+                  ],
+                  clamp: true,
+                },
+                y: {
+                  label: null,
+                  domain: equipementsDomain,
+                  tickSize: 0,
+                  tickPadding: 12,
+                  fontSize: 13,
+                },
+                color: {
+                  domain: ["Bordeaux", "Montpellier"],
+                  range: [colors.Bordeaux, colors.Montpellier],
+                  legend: true,
+                  label: "Ville",
+                  marginLeft: 100,
+                },
+                marks: [
+                  Plot.barX(butterflyData, {
+                    x: "count",
+                    y: "type",
+                    fill: "ville",
+                    insetTop: 3,
+                    insetBottom: 3,
+                    rx: 6,
+                    tip: true,
+                    title: (d) =>
+                      `${d.ville}\n${d.type}\n${d.countAbs} équipement${d.countAbs > 1 ? "s" : ""}`,
+                  }),
+                  Plot.ruleX([0], {
+                    stroke: "#1a1a1a",
+                    strokeWidth: 3,
+                  }),
+                  Plot.text(
+                    butterflyData.filter(
+                      (d) => d.ville === "Bordeaux" && d.countAbs > 0
+                    ),
+                    {
+                      x: (d) => Math.max(d.count, -150),
+                      y: "type",
+                      text: (d) => d.countAbs.toString(),
+                      dx: -12,
+                      fill: "#ffffff",
+                      fontSize: 12,
+                      fontWeight: "700",
+                    }
+                  ),
+                  Plot.text(
+                    butterflyData.filter(
+                      (d) => d.ville === "Montpellier" && d.countAbs > 0
+                    ),
+                    {
+                      x: (d) => Math.min(d.count, 150),
+                      y: "type",
+                      text: (d) => d.countAbs.toString(),
+                      dx: 12,
+                      fill: "#ffffff",
+                      fontSize: 12,
+                      fontWeight: "700",
+                    }
+                  ),
+                  Plot.text(
+                    equipementsDomain.map((type) => {
+                      const dataType = butterflyData.filter(
+                        (d) => d.type === type
+                      );
+                      const bordeaux =
+                        dataType.find((d) => d.ville === "Bordeaux")
+                          ?.countAbs || 0;
+                      const montpellier =
+                        dataType.find((d) => d.ville === "Montpellier")
+                          ?.countAbs || 0;
+                      const total = bordeaux + montpellier;
+                      return {
+                        type,
+                        total,
+                        label: `Total: ${total}`,
+                      };
+                    }),
+                    {
+                      x: 150,
+                      y: "type",
+                      text: "label",
+                      dx: 55,
+                      textAnchor: "start",
+                      fill: "#495057",
+                      fontSize: 12,
+                      fontWeight: "700",
+                      stroke: "#ffffff",
+                      strokeWidth: 2,
+                      paintOrder: "stroke",
+                    }
+                  ),
+                ],
+              }}
+            />
+          </div>
+        </section>
+
+        <section id="graphique-04" class="border-t border-gray-300 pt-12">
+          <h2 class="text-3xl font-serif text-[#111111] mb-6">
+            04 — Profils culturels multidimensionnels
+          </h2>
+          <p class="text-lg text-gray-700 leading-relaxed mb-8 max-w-3xl">
+            Vision systémique synthétisant six dimensions clés du profil
+            culturel de chaque métropole.
+          </p>
+
+          <div class="bg-white rounded-2xl p-8 shadow-sm max-w-3xl mx-auto">
+            <h3 class="text-lg font-semibold text-black mb-1">
+              Profils culturels comparés (2025)
+            </h3>
+            <p class="text-sm text-black/80 mb-4">
+              Radar Chart — Bordeaux vs Montpellier sur 6 dimensions culturelles
             </p>
-            <p>
-              <strong>D3.js</strong> pour les manipulations de données et les projections
-              géographiques
-            </p>
+            <div class="flex items-center justify-center gap-6 mb-6">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-4 h-4 rounded-full"
+                  style="background-color: #11273f;"
+                >
+                </div>
+                <span class="text-sm font-medium text-black">Bordeaux</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-4 h-4 rounded-full"
+                  style="background-color: #C45500;"
+                >
+                </div>
+                <span class="text-sm font-medium text-black">Montpellier</span>
+              </div>
+            </div>
+            <PlotFigure
+              options={{
+                width: 560,
+                height: 600,
+                margin: 80,
+                marginBottom: 100,
+                style: {
+                  background:
+                    "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+                  fontSize: 13,
+                  fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+                  color: "#1a1a1a",
+                },
+                projection: {
+                  type: "identity",
+                  domain: {
+                    type: "MultiPoint",
+                    coordinates: [
+                      [-120, -120],
+                      [120, 120],
+                    ],
+                  },
+                },
+                marks: [
+                  ...[0, 20, 40, 60, 80, 100].map((r) =>
+                    Plot.circle([{ x: 0, y: 0 }], {
+                      x: "x",
+                      y: "y",
+                      r: r * 1.1,
+                      stroke: "#dee2e6",
+                      strokeWidth: r === 100 ? 2 : 1,
+                      strokeDasharray: r === 100 ? "none" : "4,4",
+                      fill: "none",
+                    })
+                  ),
+                  Plot.link(
+                    radarData.filter((d) => d.ville === "Bordeaux"),
+                    {
+                      x1: 0,
+                      y1: 0,
+                      x2: (d) => 110 * Math.cos(d.angle),
+                      y2: (d) => 110 * Math.sin(d.angle),
+                      stroke: "#adb5bd",
+                      strokeWidth: 1,
+                    }
+                  ),
+                  Plot.text(
+                    radarData.filter((d) => d.ville === "Bordeaux"),
+                    {
+                      x: (d) => 125 * Math.cos(d.angle),
+                      y: (d) => 125 * Math.sin(d.angle),
+                      text: "dimension",
+                      fontSize: 11,
+                      fontWeight: "600",
+                      fill: "#495057",
+                      textAnchor: "middle",
+                      lineWidth: 12,
+                      lineHeight: 1.2,
+                    }
+                  ),
+                  Plot.line(
+                    radarData
+                      .filter((d) => d.ville === "Bordeaux")
+                      .sort((a, b) => a.index - b.index)
+                      .concat([
+                        radarData.find(
+                          (d) => d.ville === "Bordeaux" && d.index === 0
+                        ),
+                      ]),
+                    {
+                      x: (d) => d.value * 1.1 * Math.cos(d.angle),
+                      y: (d) => d.value * 1.1 * Math.sin(d.angle),
+                      stroke: colors.Bordeaux,
+                      strokeWidth: 0,
+                      fill: colors.Bordeaux,
+                      fillOpacity: 0.25,
+                      curve: "linear-closed",
+                    }
+                  ),
+                  Plot.line(
+                    radarData
+                      .filter((d) => d.ville === "Montpellier")
+                      .sort((a, b) => a.index - b.index)
+                      .concat([
+                        radarData.find(
+                          (d) => d.ville === "Montpellier" && d.index === 0
+                        ),
+                      ]),
+                    {
+                      x: (d) => d.value * 1.1 * Math.cos(d.angle),
+                      y: (d) => d.value * 1.1 * Math.sin(d.angle),
+                      stroke: colors.Montpellier,
+                      strokeWidth: 0,
+                      fill: colors.Montpellier,
+                      fillOpacity: 0.25,
+                      curve: "linear-closed",
+                    }
+                  ),
+                  Plot.line(
+                    radarData
+                      .filter((d) => d.ville === "Bordeaux")
+                      .sort((a, b) => a.index - b.index)
+                      .concat([
+                        radarData.find(
+                          (d) => d.ville === "Bordeaux" && d.index === 0
+                        ),
+                      ]),
+                    {
+                      x: (d) => d.value * 1.1 * Math.cos(d.angle),
+                      y: (d) => d.value * 1.1 * Math.sin(d.angle),
+                      stroke: colors.Bordeaux,
+                      strokeWidth: 3,
+                      curve: "linear-closed",
+                    }
+                  ),
+                  Plot.line(
+                    radarData
+                      .filter((d) => d.ville === "Montpellier")
+                      .sort((a, b) => a.index - b.index)
+                      .concat([
+                        radarData.find(
+                          (d) => d.ville === "Montpellier" && d.index === 0
+                        ),
+                      ]),
+                    {
+                      x: (d) => d.value * 1.1 * Math.cos(d.angle),
+                      y: (d) => d.value * 1.1 * Math.sin(d.angle),
+                      stroke: colors.Montpellier,
+                      strokeWidth: 3,
+                      curve: "linear-closed",
+                    }
+                  ),
+                  Plot.text(radarData, {
+                    x: (d) => (d.value * 1.1 - 10) * Math.cos(d.angle),
+                    y: (d) => (d.value * 1.1 - 10) * Math.sin(d.angle),
+                    text: (d) => d.rawValue.toFixed(1),
+                    fill: (d) => colors[d.ville],
+                    fontSize: 10,
+                    fontWeight: "700",
+                    stroke: "#ffffff",
+                    strokeWidth: 2.5,
+                    paintOrder: "stroke",
+                    textAnchor: "middle",
+                  }),
+                  Plot.dot(radarData, {
+                    x: (d) => d.value * 1.1 * Math.cos(d.angle),
+                    y: (d) => d.value * 1.1 * Math.sin(d.angle),
+                    r: 5,
+                    fill: (d) => colors[d.ville],
+                    stroke: "#ffffff",
+                    strokeWidth: 2,
+                    tip: true,
+                    title: (d) =>
+                      `${d.ville}\n${d.dimension.replace(/\n/g, " ")}\nValeur: ${d.rawValue.toFixed(2)}`,
+                  }),
+                ],
+              }}
+            />
           </div>
         </section>
 
         <div class="border-t border-gray-300 pt-12 text-center">
           <a
-            href="/#chapitre-01"
+            href="/"
             class="inline-block px-8 py-4 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-semibold"
           >
-            Explorer les graphiques
+            Retour au storytelling
           </a>
         </div>
       </div>
     </div>
   </div>
 </SimpleLayout>
+
+<style>
+  .radio-custom {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    border-radius: 50% !important;
+    border: 2px solid #d1d5db !important;
+    background-color: #ffffff !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .radio-custom:checked {
+    background-color: #000000 !important;
+    border: 3px solid #ffffff !important;
+    box-shadow: 0 0 0 2px #000000 !important;
+  }
+
+  .radio-custom:hover {
+    border-color: #9ca3af !important;
+  }
+
+  :global(figure [aria-label="color-legend"]),
+  :global(figure [aria-label="color-legend"] *),
+  :global(figure svg g[aria-label="color-legend"] text),
+  :global(figure svg g[aria-label="color-legend"] span) {
+    color: #000000 !important;
+    fill: #000000 !important;
+  }
+
+  :global(figure svg g[aria-label="x-axis"] text),
+  :global(figure svg g[aria-label="y-axis"] text),
+  :global(
+      figure
+        svg
+        text[fill]:not([fill="#ffffff"]):not([fill="white"]):not([fill="#fff"])
+    ) {
+    fill: #000000 !important;
+  }
+
+  :global(figure svg text) {
+    fill: currentColor;
+  }
+
+  :global(figure) {
+    color: #000000 !important;
+  }
+</style>
+
+<script>
+  declare global {
+    interface Window {
+      Plot: any;
+      d3: any;
+      L: any;
+    }
+  }
+
+  const LieuxParVilleTypeData = JSON.parse(
+    document.getElementById("data-lieux")?.textContent || "[]"
+  );
+
+  const colors = {
+    Bordeaux: "#11273f",
+    Montpellier: "#C45500",
+  };
+
+  function renderChart(choixType) {
+    const container = document.getElementById("chart-container");
+    if (!container || !window.Plot) return;
+
+    const subtitle = document.getElementById("chart-subtitle");
+    if (subtitle) {
+      subtitle.textContent = `Nombre d'habitants par ${
+        choixType === "physique" ? "lieu culturel physique" : "offre numérique"
+      } — Bordeaux vs Montpellier`;
+    }
+
+    container.innerHTML = "";
+
+    const filteredData = LieuxParVilleTypeData.filter(
+      (d) => d.type_offre === choixType
+    );
+
+    const plot = window.Plot.plot({
+      height: 480,
+      marginLeft: 100,
+      marginBottom: 70,
+      marginTop: 40,
+      width: 560,
+      style: {
+        background: "linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)",
+        fontSize: "14px",
+        fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+        color: "#000000",
+      },
+      x: {
+        label: "Ville",
+        domain: ["Bordeaux", "Montpellier"],
+        tickSize: 0,
+      },
+      y: {
+        grid: true,
+        label:
+          choixType === "physique"
+            ? "↑ Habitants par offre culturelle physique"
+            : "↑ Habitants par offre culturelle numérique",
+        labelAnchor: "top",
+        labelOffset: 40,
+        tickFormat: "~s",
+      },
+      color: {
+        domain: ["Bordeaux", "Montpellier"],
+        range: [colors.Bordeaux, colors.Montpellier],
+        legend: true,
+        label: "Ville",
+      },
+      marks: [
+        window.Plot.ruleY([0], { stroke: "#333", strokeWidth: 1.5 }),
+        window.Plot.barY(filteredData, {
+          x: "ville",
+          y: "habitants_par_lieu",
+          fill: "ville",
+          rx: 8,
+          tip: {
+            fill: "#ffffff",
+            stroke: (d) =>
+              d.ville === "Bordeaux" ? colors.Bordeaux : colors.Montpellier,
+            strokeWidth: 3,
+            fontSize: "14px",
+          },
+          title: (d) =>
+            `${d.ville} — ${
+              d.type_offre === "physique" ? "Offre physique" : "Offre numérique"
+            }\n\n${d.habitants_par_lieu
+              ?.toFixed(0)
+              .replace(/\B(?=(\d{3})+(?!\d))/g, " ")} habitants/${
+              d.type_offre === "physique" ? "lieu" : "offre"
+            }\n${d.lieux} ${d.type_offre === "physique" ? "lieu" : "offre"}${
+              d.lieux > 1 ? "s" : ""
+            }`,
+        }),
+        window.Plot.text(filteredData, {
+          x: "ville",
+          y: (d) => d.habitants_par_lieu + d.habitants_par_lieu * 0.04,
+          text: (d) => d.habitants_par_lieu.toLocaleString("fr-FR"),
+          textAnchor: "middle",
+          fill: "#111111",
+          fontSize: 18,
+          fontWeight: "700",
+          stroke: "#ffffff",
+          strokeWidth: 3,
+          paintOrder: "stroke",
+        }),
+        window.Plot.text(filteredData, {
+          x: "ville",
+          y: (d) => d.habitants_par_lieu * 0.5,
+          text: (d) =>
+            `${d.lieux} ${choixType === "physique" ? "lieu" : "offre"}${
+              d.lieux > 1 ? (choixType === "physique" ? "x" : "s") : ""
+            }`,
+          textAnchor: "middle",
+          fill: "#ffffff",
+          fontSize: 15,
+          fontWeight: "600",
+          opacity: 0.95,
+        }),
+      ],
+    });
+
+    container.appendChild(plot);
+
+    setTimeout(() => {
+      const allTexts = container.querySelectorAll("svg text");
+      allTexts.forEach((text) => {
+        const textContent = text.textContent || "";
+        const isLieuxText = /^\d+\s+(lieu|offre)/.test(textContent.trim());
+
+        if (isLieuxText) {
+          text.setAttribute("fill", "#ffffff");
+          text.style.fill = "#ffffff";
+        } else {
+          const fillColor = text.getAttribute("fill");
+          const computedFill = window.getComputedStyle(text).fill;
+          if (
+            fillColor !== "#ffffff" &&
+            fillColor !== "white" &&
+            fillColor !== "#fff" &&
+            !computedFill.includes("255, 255, 255")
+          ) {
+            text.setAttribute("fill", "#000000");
+            text.style.fill = "#000000";
+          }
+        }
+      });
+    }, 100);
+  }
+
+  const radioInputs = document.querySelectorAll('input[name="choixType"]');
+  radioInputs.forEach((input) => {
+    input.addEventListener("change", (e) => {
+      renderChart((e.target as HTMLInputElement).value);
+    });
+  });
+
+  function initChart() {
+    if (window.Plot) {
+      renderChart("physique");
+    } else {
+      setTimeout(initChart, 100);
+    }
+  }
+
+  function forceBlackText() {
+    const allFigures = document.querySelectorAll("figure");
+    allFigures.forEach((figure) => {
+      const allTexts = figure.querySelectorAll("svg text");
+      allTexts.forEach((text) => {
+        const textContent = text.textContent || "";
+        const isNumberOnly = /^\d+$/.test(textContent.trim());
+
+        if (isNumberOnly) {
+          text.setAttribute("fill", "#ffffff");
+          text.style.fill = "#ffffff";
+        } else {
+          const fillColor = text.getAttribute("fill");
+          const computedFill = window.getComputedStyle(text).fill;
+          if (
+            fillColor !== "#ffffff" &&
+            fillColor !== "white" &&
+            fillColor !== "#fff" &&
+            !computedFill.includes("255, 255, 255")
+          ) {
+            text.setAttribute("fill", "#000000");
+            text.style.fill = "#000000";
+          }
+        }
+      });
+    });
+  }
+
+  initChart();
+
+  setTimeout(forceBlackText, 500);
+  setTimeout(forceBlackText, 1000);
+  setTimeout(forceBlackText, 2000);
+
+  let mapBordeaux = null;
+  let mapMontpellier = null;
+  let dataBordeaux = [];
+  let dataMontpellier = [];
+  let mapsInitialized = false;
+
+  async function loadData() {
+    try {
+      const response = await fetch("/src/assets/DataCulturelles2025.json");
+      const data = await response.json();
+
+      dataBordeaux = data.filter((d) => d.ville?.toLowerCase() === "bordeaux");
+      dataMontpellier = data.filter(
+        (d) => d.ville?.toLowerCase() === "montpellier"
+      );
+
+      const equipmentsBdx = [
+        ...new Set(dataBordeaux.map((d) => d.type_equipement)),
+      ]
+        .filter(Boolean)
+        .sort();
+      const equipmentsMtp = [
+        ...new Set(dataMontpellier.map((d) => d.type_equipement)),
+      ]
+        .filter(Boolean)
+        .sort();
+
+      const selectBdx = document.getElementById("filtreEquipementBdx");
+      const selectMtp = document.getElementById("filtreEquipementMtp");
+
+      equipmentsBdx.forEach((eq) => {
+        const option = document.createElement("option");
+        option.value = eq;
+        option.textContent = eq;
+        selectBdx.appendChild(option);
+      });
+
+      equipmentsMtp.forEach((eq) => {
+        const option = document.createElement("option");
+        option.value = eq;
+        option.textContent = eq;
+        selectMtp.appendChild(option);
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Error loading data:", error);
+      return false;
+    }
+  }
+
+  function createIcon(typeOffre) {
+    const color = typeOffre === "numérique" ? "#C45500" : "#11273f";
+    const size = typeOffre === "numérique" ? 20 : 16;
+    return window.L.divIcon({
+      className: "custom-icon",
+      html: `<div style="background-color: ${color}; width: ${size}px; height: ${size}px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.4);"></div>`,
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
+    });
+  }
+
+  function initMapBordeaux() {
+    if (!document.getElementById("map-bordeaux") || !window.L) return;
+
+    mapBordeaux = window.L.map("map-bordeaux").setView([44.8378, -0.5792], 13);
+
+    window.L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+      {
+        attribution: "© OpenStreetMap © CARTO",
+        maxZoom: 19,
+      }
+    ).addTo(mapBordeaux);
+
+    updateMapBordeaux();
+  }
+
+  function initMapMontpellier() {
+    if (!document.getElementById("map-montpellier") || !window.L) return;
+
+    mapMontpellier = window.L.map("map-montpellier").setView(
+      [43.6109, 3.8767],
+      13
+    );
+
+    window.L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+      {
+        attribution: "© OpenStreetMap © CARTO",
+        maxZoom: 19,
+      }
+    ).addTo(mapMontpellier);
+
+    updateMapMontpellier();
+  }
+
+  function updateMapBordeaux() {
+    if (!mapBordeaux) return;
+
+    mapBordeaux.eachLayer((layer) => {
+      if (layer instanceof window.L.Marker) {
+        mapBordeaux.removeLayer(layer);
+      }
+    });
+
+    const typeOffre = (
+      document.getElementById("filtreTypeOffreBdx") as HTMLSelectElement
+    ).value;
+    const typeEquipement = (
+      document.getElementById("filtreEquipementBdx") as HTMLSelectElement
+    ).value;
+
+    let filtered = dataBordeaux;
+    if (typeOffre !== "Toutes") {
+      filtered = filtered.filter((d) => d.type_offre === typeOffre);
+    }
+    if (typeEquipement !== "Tous") {
+      filtered = filtered.filter((d) => d.type_equipement === typeEquipement);
+    }
+
+    filtered.forEach((d) => {
+      if (d.latitude && d.longitude) {
+        const icon = createIcon(d.type_offre);
+        const popupContent = `
+          <div style="font-family: Inter, sans-serif; max-width: 280px;">
+            <h3 style="margin: 0 0 12px 0; color: #1a1a1a; font-size: 17px; font-weight: 600; border-bottom: 2px solid ${
+              d.type_offre === "numérique" ? "#C45500" : "#11273f"
+            }; padding-bottom: 8px;">
+              ${d.nom}
+            </h3>
+            <p style="margin: 6px 0; color: #495057; font-size: 14px;">
+              <strong>Type:</strong> ${d.type_equipement}
+            </p>
+            <p style="margin: 6px 0; color: #495057; font-size: 14px;">
+              <strong>Adresse:</strong> ${d.adresse}
+            </p>
+          </div>
+        `;
+
+        window.L.marker([d.latitude, d.longitude], { icon })
+          .bindPopup(popupContent)
+          .addTo(mapBordeaux);
+      }
+    });
+  }
+
+  function updateMapMontpellier() {
+    if (!mapMontpellier) return;
+
+    mapMontpellier.eachLayer((layer) => {
+      if (layer instanceof window.L.Marker) {
+        mapMontpellier.removeLayer(layer);
+      }
+    });
+
+    const typeOffre = (
+      document.getElementById("filtreTypeOffreMtp") as HTMLSelectElement
+    ).value;
+    const typeEquipement = (
+      document.getElementById("filtreEquipementMtp") as HTMLSelectElement
+    ).value;
+
+    let filtered = dataMontpellier;
+    if (typeOffre !== "Toutes") {
+      filtered = filtered.filter((d) => d.type_offre === typeOffre);
+    }
+    if (typeEquipement !== "Tous") {
+      filtered = filtered.filter((d) => d.type_equipement === typeEquipement);
+    }
+
+    filtered.forEach((d) => {
+      if (d.latitude && d.longitude) {
+        const icon = createIcon(d.type_offre);
+        const popupContent = `
+          <div style="font-family: Inter, sans-serif; max-width: 280px;">
+            <h3 style="margin: 0 0 12px 0; color: #1a1a1a; font-size: 17px; font-weight: 600; border-bottom: 2px solid ${
+              d.type_offre === "numérique" ? "#C45500" : "#11273f"
+            }; padding-bottom: 8px;">
+              ${d.nom}
+            </h3>
+            <p style="margin: 6px 0; color: #495057; font-size: 14px;">
+              <strong>Type:</strong> ${d.type_equipement}
+            </p>
+            <p style="margin: 6px 0; color: #495057; font-size: 14px;">
+              <strong>Adresse:</strong> ${d.adresse}
+            </p>
+          </div>
+        `;
+
+        window.L.marker([d.latitude, d.longitude], { icon })
+          .bindPopup(popupContent)
+          .addTo(mapMontpellier);
+      }
+    });
+  }
+
+  async function initLeafletMaps() {
+    if (mapsInitialized || !window.L) return;
+
+    const dataLoaded = await loadData();
+    if (!dataLoaded) return;
+
+    initMapBordeaux();
+    initMapMontpellier();
+
+    document
+      .getElementById("filtreTypeOffreBdx")
+      ?.addEventListener("change", updateMapBordeaux);
+    document
+      .getElementById("filtreEquipementBdx")
+      ?.addEventListener("change", updateMapBordeaux);
+    document
+      .getElementById("filtreTypeOffreMtp")
+      ?.addEventListener("change", updateMapMontpellier);
+    document
+      .getElementById("filtreEquipementMtp")
+      ?.addEventListener("change", updateMapMontpellier);
+
+    mapsInitialized = true;
+  }
+
+  setTimeout(() => initLeafletMaps(), 500);
+
+  let currentMapMode = "leaflet";
+  let geoMapsInitialized = false;
+  let bordeauxGeoData: any = null;
+  let montpellierGeoData: any = null;
+  let dataBdxFull: any[] = [];
+  let dataMtpFull: any[] = [];
+
+  function loadGeoData() {
+    try {
+      bordeauxGeoData = JSON.parse(
+        document.getElementById("data-bordeaux-geo")!.textContent || "{}"
+      );
+      montpellierGeoData = JSON.parse(
+        document.getElementById("data-montpellier-geo")!.textContent || "{}"
+      );
+      dataBdxFull = JSON.parse(
+        document.getElementById("data-bordeaux")!.textContent || "[]"
+      );
+      dataMtpFull = JSON.parse(
+        document.getElementById("data-montpellier")!.textContent || "[]"
+      );
+
+      const equipmentsBdx = [
+        ...new Set(dataBdxFull.map((d) => d.type_equipement)),
+      ]
+        .filter(Boolean)
+        .sort();
+
+      const selectGeo = document.getElementById(
+        "filtreEquipementGeo"
+      ) as HTMLSelectElement;
+      equipmentsBdx.forEach((eq: string) => {
+        const option = document.createElement("option");
+        option.value = eq;
+        option.textContent = eq;
+        selectGeo?.appendChild(option);
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Error loading geo data:", error);
+      return false;
+    }
+  }
+
+  function filterGeoData(data: any[], filterValue: string) {
+    if (filterValue === "Toutes") {
+      return data;
+    }
+    return data.filter((d) => d.type_equipement === filterValue);
+  }
+
+  function renderGeoBordeaux(filteredData: any[]) {
+    if (!window.Plot || !window.d3) return;
+
+    const container = document.getElementById("geo-bordeaux");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const plot = window.Plot.plot({
+      projection: {
+        type: "identity",
+        domain: bordeauxGeoData,
+      },
+      width: 550,
+      height: 680,
+      marginTop: 40,
+      marginBottom: 50,
+      marginLeft: 20,
+      marginRight: 20,
+      style: {
+        background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+        fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+        color: "#000000",
+      },
+      color: {
+        legend: true,
+        label: "Type d'offre culturelle",
+        domain: ["physique", "numérique"],
+        range: ["#11273f", "#C45500"],
+        tickFormat: (d: string) =>
+          d === "physique" ? "Lieu physique" : "Initiative numérique",
+        marginLeft: 40,
+      },
+      marks: [
+        window.Plot.geo(bordeauxGeoData, {
+          fill: "#ffffff",
+          stroke: "#495057",
+          strokeWidth: 1.2,
+          strokeOpacity: 0.8,
+        }),
+        window.Plot.dot(filteredData, {
+          x: "longitude",
+          y: "latitude",
+          r: (d: any) => (d.type_offre === "numérique" ? 7 : 5.5),
+          fill: "#000000",
+          opacity: 0.1,
+          dx: 1,
+          dy: 1,
+        }),
+        window.Plot.dot(filteredData, {
+          x: "longitude",
+          y: "latitude",
+          r: (d: any) => (d.type_offre === "numérique" ? 6.5 : 5),
+          fill: (d: any) => d.type_offre,
+          stroke: "#ffffff",
+          strokeWidth: 1.5,
+          strokeOpacity: 0.9,
+          opacity: 0.92,
+          tip: true,
+          title: (d: any) => {
+            const base = `${d.nom}\n${d.type_equipement}\n${d.adresse}`;
+            if (d.type_offre === "numérique" && d.type_initiative?.length) {
+              return `${base}\n${d.type_initiative.join(", ")}`;
+            }
+            return base;
+          },
+        }),
+      ],
+    });
+
+    container.appendChild(plot);
+
+    setTimeout(() => {
+      const allTexts = container.querySelectorAll("svg text");
+      allTexts.forEach((text) => {
+        const fillColor = text.getAttribute("fill");
+        const computedFill = window.getComputedStyle(text).fill;
+        if (
+          fillColor !== "#ffffff" &&
+          fillColor !== "white" &&
+          fillColor !== "#fff" &&
+          !computedFill.includes("255, 255, 255")
+        ) {
+          text.setAttribute("fill", "#000000");
+          text.style.fill = "#000000";
+        }
+      });
+    }, 100);
+  }
+
+  function renderGeoMontpellier(filteredData: any[]) {
+    if (!window.Plot || !window.d3) return;
+
+    const container = document.getElementById("geo-montpellier");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const plot = window.Plot.plot({
+      projection: {
+        type: "identity",
+        domain: montpellierGeoData,
+      },
+      width: 550,
+      height: 680,
+      marginTop: 40,
+      marginBottom: 50,
+      marginLeft: 20,
+      marginRight: 20,
+      style: {
+        background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+        fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+        color: "#000000",
+      },
+      color: {
+        legend: true,
+        label: "Type d'offre culturelle",
+        domain: ["physique", "numérique"],
+        range: ["#11273f", "#C45500"],
+        tickFormat: (d: string) =>
+          d === "physique" ? "Lieu physique" : "Initiative numérique",
+        marginLeft: 40,
+      },
+      marks: [
+        window.Plot.geo(montpellierGeoData, {
+          fill: "#ffffff",
+          stroke: "#495057",
+          strokeWidth: 1.2,
+          strokeOpacity: 0.8,
+        }),
+        window.Plot.dot(filteredData, {
+          x: "longitude",
+          y: "latitude",
+          r: (d: any) => (d.type_offre === "numérique" ? 7 : 5.5),
+          fill: "#000000",
+          opacity: 0.1,
+          dx: 1,
+          dy: 1,
+        }),
+        window.Plot.dot(filteredData, {
+          x: "longitude",
+          y: "latitude",
+          r: (d: any) => (d.type_offre === "numérique" ? 6.5 : 5),
+          fill: (d: any) => d.type_offre,
+          stroke: "#ffffff",
+          strokeWidth: 1.5,
+          strokeOpacity: 0.9,
+          opacity: 0.92,
+          tip: true,
+          title: (d: any) => {
+            const base = `${d.nom}\n${d.type_equipement}\n${d.adresse}`;
+            if (d.type_offre === "numérique" && d.type_initiative?.length) {
+              return `${base}\n${d.type_initiative.join(", ")}`;
+            }
+            return base;
+          },
+        }),
+      ],
+    });
+
+    container.appendChild(plot);
+
+    setTimeout(() => {
+      const allTexts = container.querySelectorAll("svg text");
+      allTexts.forEach((text) => {
+        const fillColor = text.getAttribute("fill");
+        const computedFill = window.getComputedStyle(text).fill;
+        if (
+          fillColor !== "#ffffff" &&
+          fillColor !== "white" &&
+          fillColor !== "#fff" &&
+          !computedFill.includes("255, 255, 255")
+        ) {
+          text.setAttribute("fill", "#000000");
+          text.style.fill = "#000000";
+        }
+      });
+    }, 100);
+  }
+
+  function updateGeoMaps() {
+    const filterValue = (
+      document.getElementById("filtreEquipementGeo") as HTMLSelectElement
+    ).value;
+    const filteredBdx = filterGeoData(dataBdxFull, filterValue);
+    const filteredMtp = filterGeoData(dataMtpFull, filterValue);
+
+    renderGeoBordeaux(filteredBdx);
+    renderGeoMontpellier(filteredMtp);
+  }
+
+  function initGeoMaps() {
+    if (geoMapsInitialized) {
+      updateGeoMaps();
+      return;
+    }
+
+    const dataLoaded = loadGeoData();
+    if (!dataLoaded) return;
+
+    updateGeoMaps();
+
+    document
+      .getElementById("filtreEquipementGeo")
+      ?.addEventListener("change", updateGeoMaps);
+
+    geoMapsInitialized = true;
+  }
+
+  function switchToLeaflet() {
+    currentMapMode = "leaflet";
+    document.getElementById("leaflet-container")!.classList.remove("hidden");
+    document.getElementById("geojson-container")!.classList.add("hidden");
+
+    const btnLeaflet = document.getElementById("btn-leaflet")!;
+    const btnGeojson = document.getElementById("btn-geojson")!;
+
+    btnLeaflet.classList.add("bg-[#111111]", "text-white");
+    btnLeaflet.classList.remove("text-gray-700", "hover:bg-gray-100");
+    btnGeojson.classList.remove("bg-[#111111]", "text-white");
+    btnGeojson.classList.add("text-gray-700", "hover:bg-gray-100");
+
+    if (mapBordeaux && mapMontpellier) {
+      setTimeout(() => {
+        mapBordeaux.invalidateSize();
+        mapMontpellier.invalidateSize();
+      }, 100);
+    }
+  }
+
+  function switchToGeojson() {
+    currentMapMode = "geojson";
+    document.getElementById("leaflet-container")!.classList.add("hidden");
+    document.getElementById("geojson-container")!.classList.remove("hidden");
+
+    const btnLeaflet = document.getElementById("btn-leaflet")!;
+    const btnGeojson = document.getElementById("btn-geojson")!;
+
+    btnLeaflet.classList.remove("bg-[#111111]", "text-white");
+    btnLeaflet.classList.add("text-gray-700", "hover:bg-gray-100");
+    btnGeojson.classList.add("bg-[#111111]", "text-white");
+    btnGeojson.classList.remove("text-gray-700", "hover:bg-gray-100");
+
+    if (!geoMapsInitialized) {
+      setTimeout(() => initGeoMaps(), 100);
+    }
+  }
+
+  document
+    .getElementById("btn-leaflet")
+    ?.addEventListener("click", switchToLeaflet);
+  document
+    .getElementById("btn-geojson")
+    ?.addEventListener("click", switchToGeojson);
+</script>
+
+<script
+  type="application/json"
+  id="data-lieux"
+  set:html={JSON.stringify(LieuxParVilleType)}
+/>
+
+<script
+  type="application/json"
+  id="data-bordeaux-geo"
+  set:html={JSON.stringify(bordeauxGeo)}
+/>
+
+<script
+  type="application/json"
+  id="data-montpellier-geo"
+  set:html={JSON.stringify(montpellierGeo)}
+/>
+
+<script
+  type="application/json"
+  id="data-bordeaux"
+  set:html={JSON.stringify(
+    data.filter((d) => d.ville?.toLowerCase() === "bordeaux")
+  )}
+/>
+
+<script
+  type="application/json"
+  id="data-montpellier"
+  set:html={JSON.stringify(
+    data.filter((d) => d.ville?.toLowerCase() === "montpellier")
+  )}
+/>

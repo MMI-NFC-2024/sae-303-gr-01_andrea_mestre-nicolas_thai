@@ -263,33 +263,32 @@ normalizedRadarDimensions.forEach((d, i) => {
     <div class="container mx-auto px-6 relative z-10 w-full">
       <div class="max-w-5xl mx-auto text-center fade-in-section">
         <div
-          class="text-xs uppercase tracking-[0.2em] text-base-content/40 mb-8"
+          class="text-sm uppercase tracking-[0.3em] text-base-content/40 mb-8"
         >
-          SAÉ 303 — Datavisualisation
+          Datavisualisation
         </div>
 
-        <h1 class="text-5xl md:text-7xl lg:text-8xl font-serif mb-8">
-          Tradition<br />
-          <span class="italic">vs</span><br />
-          Innovation
+        <h1 class="text-5xl md:text-7xl lg:text-6xl font-serif mb-8 text-center">
+          Comment les villes de Bordeaux et Montpellier réinventent-elles l'accès à la culture
+          ?
         </h1>
 
         <p
           class="text-xl md:text-2xl text-base-content/60 mb-4 max-w-2xl mx-auto font-light"
         >
-          Une exploration comparative des offres culturelles
+          Analyse comparative des différentes offres culturelles des villes de Bordeaux et Montpellier
         </p>
 
         <div
           class="flex items-center justify-center gap-6 mb-16 text-base-content/50"
         >
           <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded-full bg-gray-400"></div>
+            <div class="w-3 h-3 rounded-full bg-[#11273f]"></div>
             <span class="text-sm">Bordeaux</span>
           </div>
           <div class="w-px h-4 bg-base-content/20"></div>
           <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded-full bg-white"></div>
+            <div class="w-3 h-3 rounded-full bg-[#C45500]"></div>
             <span class="text-sm">Montpellier</span>
           </div>
         </div>
@@ -299,12 +298,13 @@ normalizedRadarDimensions.forEach((d, i) => {
             href="#intro"
             class="btn bg-white text-black hover:bg-gray-200 btn-lg border-0"
           >
-            Découvrir l'analyse
+            Explorer l'analyse
           </a>
           <a
-            href="#about"
+            href="https://observablehq.com/d/fccb74fe2865f952"
+            target="_blank"
             class="btn btn-ghost btn-lg border border-white/20 hover:bg-white/10"
-            >Méthodologie</a
+            >NoteBook Observable</a
           >
         </div>
 
@@ -312,22 +312,18 @@ normalizedRadarDimensions.forEach((d, i) => {
           class="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-4xl mx-auto text-center"
         >
           <div>
-            <div class="text-5xl md:text-6xl font-serif mb-2 text-gray-400">
-              407
-            </div>
-            <div class="text-sm text-base-content/60">Monuments à Bordeaux</div>
-          </div>
-          <div>
-            <div class="text-5xl md:text-6xl font-serif mb-2 text-white">
-              51
-            </div>
+            <div class="text-5xl md:text-6xl font-serif mb-2 text-white">5</div>
             <div class="text-sm text-base-content/60">
-              Festivals à Montpellier
+              Jeux de données analysés
             </div>
           </div>
           <div>
-            <div class="text-5xl md:text-6xl font-serif mb-2">8</div>
-            <div class="text-sm text-base-content/60">Catégories analysées</div>
+            <div class="text-5xl md:text-6xl font-serif mb-2 text-white">7</div>
+            <div class="text-sm text-base-content/60">Graphiques réalisés</div>
+          </div>
+          <div>
+            <div class="text-5xl md:text-6xl font-serif mb-2">3</div>
+            <div class="text-sm text-base-content/60">Jours de travail</div>
           </div>
         </div>
       </div>
@@ -340,7 +336,7 @@ normalizedRadarDimensions.forEach((d, i) => {
   >
     <div class="container mx-auto max-w-4xl px-6 py-24">
       <div class="space-y-8 fade-in-section">
-        <div class="text-xs uppercase tracking-[0.3em] text-gray-500">
+        <div class="text-sm uppercase tracking-[0.3em] text-gray-500">
           Introduction
         </div>
 
@@ -392,7 +388,7 @@ normalizedRadarDimensions.forEach((d, i) => {
     <div class="container mx-auto max-w-7xl px-6 py-24">
       <div class="fade-in-section">
         <div class="max-w-4xl mb-16">
-          <div class="text-xs uppercase tracking-[0.2em] text-gray-500 mb-6">
+          <div class="text-sm uppercase tracking-[0.3em] text-gray-500 mb-6">
             Chapitre 01
           </div>
           <h2 class="text-4xl md:text-6xl font-serif mb-6 text-[#111111]">
@@ -419,7 +415,7 @@ normalizedRadarDimensions.forEach((d, i) => {
                     name="choixType"
                     value="physique"
                     checked
-                    class="radio radio-sm radio-primary"
+                    class="radio radio-sm radio-custom"
                   />
                   <span class="text-gray-700">Physique</span>
                 </label>
@@ -428,13 +424,22 @@ normalizedRadarDimensions.forEach((d, i) => {
                     type="radio"
                     name="choixType"
                     value="numérique"
-                    class="radio radio-sm radio-primary"
+                    class="radio radio-sm radio-custom"
                   />
                   <span class="text-gray-700">Numérique</span>
                 </label>
               </div>
             </div>
-            <div id="chart-container"></div>
+            <div>
+              <h3 class="text-lg font-semibold text-black mb-1">
+                Accessibilité culturelle selon le type d'offre (2025)
+              </h3>
+              <p id="chart-subtitle" class="text-sm text-black/80 mb-6">
+                Nombre d'habitants par lieu culturel physique — Bordeaux vs
+                Montpellier
+              </p>
+              <div id="chart-container"></div>
+            </div>
           </div>
 
           <div class="space-y-8">
@@ -507,7 +512,7 @@ normalizedRadarDimensions.forEach((d, i) => {
     <div class="container mx-auto max-w-7xl px-6 py-24">
       <div class="fade-in-section">
         <div class="max-w-5xl mb-16">
-          <div class="text-xs uppercase tracking-[0.2em] text-gray-500 mb-6">
+          <div class="text-sm uppercase tracking-[0.3em] text-gray-500 mb-6">
             Chapitre 02
           </div>
           <h2 class="text-4xl md:text-6xl font-serif mb-6 text-[#111111]">
@@ -640,6 +645,13 @@ normalizedRadarDimensions.forEach((d, i) => {
           <div class="grid lg:grid-cols-2 gap-8 mb-8">
             <div>
               <h3 class="text-2xl font-serif text-[#11273f] mb-4">Bordeaux</h3>
+              <h4 class="text-base font-semibold text-black mb-1">
+                Accessibilité culturelle à Bordeaux
+              </h4>
+              <p class="text-xs text-black/80 mb-4">
+                Répartition géographique des lieux et initiatives culturelles —
+                physiques et numériques • 2025
+              </p>
               <div id="geo-bordeaux" class="w-full rounded-xl"></div>
             </div>
 
@@ -647,6 +659,13 @@ normalizedRadarDimensions.forEach((d, i) => {
               <h3 class="text-2xl font-serif text-[#C45500] mb-4">
                 Montpellier
               </h3>
+              <h4 class="text-base font-semibold text-black mb-1">
+                Accessibilité culturelle à Montpellier
+              </h4>
+              <p class="text-xs text-black/80 mb-4">
+                Répartition géographique des lieux et initiatives culturelles —
+                physiques et numériques • 2025
+              </p>
               <div id="geo-montpellier" class="w-full rounded-xl"></div>
             </div>
           </div>
@@ -662,7 +681,7 @@ normalizedRadarDimensions.forEach((d, i) => {
     <div class="container mx-auto max-w-7xl px-6 py-24">
       <div class="fade-in-section">
         <div class="max-w-5xl mb-16">
-          <div class="text-xs uppercase tracking-[0.2em] text-gray-500 mb-6">
+          <div class="text-sm uppercase tracking-[0.3em] text-gray-500 mb-6">
             Chapitre 03
           </div>
           <h2 class="text-4xl md:text-6xl font-serif mb-6 text-[#111111]">
@@ -680,15 +699,19 @@ normalizedRadarDimensions.forEach((d, i) => {
         </div>
 
         <div class="bg-white rounded-2xl p-8 shadow-sm mb-12">
+          <h3 class="text-lg font-semibold text-black mb-1">
+            Top 10 des équipements culturels (2025)
+          </h3>
+          <p class="text-sm text-black/80 mb-6">
+            Comparaison Bordeaux vs Montpellier — Équipements avec minimum 3
+            lieux
+          </p>
           <PlotFigure
             options={{
-              title: "Top 10 des équipements culturels (2025)",
-              subtitle:
-                "Comparaison Bordeaux vs Montpellier — Équipements avec minimum 3 lieux",
               marginLeft: 180,
               marginRight: 220,
               marginBottom: 70,
-              marginTop: 90,
+              marginTop: 50,
               width: 1200,
               height: 480,
               style: {
@@ -844,7 +867,7 @@ normalizedRadarDimensions.forEach((d, i) => {
     <div class="container mx-auto max-w-7xl px-6 py-24">
       <div class="fade-in-section">
         <div class="max-w-5xl mb-16 text-right ml-auto">
-          <div class="text-xs uppercase tracking-[0.2em] text-gray-500 mb-6">
+          <div class="text-sm uppercase tracking-[0.3em] text-gray-500 mb-6">
             Chapitre 04
           </div>
           <h2 class="text-4xl md:text-6xl font-serif mb-6 text-[#111111]">
@@ -908,11 +931,32 @@ normalizedRadarDimensions.forEach((d, i) => {
           </div>
 
           <div class="bg-white rounded-2xl p-8 shadow-sm">
+            <h3 class="text-lg font-semibold text-black mb-1">
+              Profils culturels comparés (2025)
+            </h3>
+            <p class="text-sm text-black/80 mb-4">
+              Radar Chart — Bordeaux vs Montpellier sur 6 dimensions culturelles
+            </p>
+            <div class="flex items-center justify-center gap-6 mb-6">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-4 h-4 rounded-full"
+                  style="background-color: #11273f;"
+                >
+                </div>
+                <span class="text-sm font-medium text-black">Bordeaux</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-4 h-4 rounded-full"
+                  style="background-color: #C45500;"
+                >
+                </div>
+                <span class="text-sm font-medium text-black">Montpellier</span>
+              </div>
+            </div>
             <PlotFigure
               options={{
-                title: "Profils culturels comparés (2025)",
-                subtitle:
-                  "Radar Chart — Bordeaux vs Montpellier sur 6 dimensions culturelles",
                 width: 560,
                 height: 600,
                 margin: 80,
@@ -1092,7 +1136,7 @@ normalizedRadarDimensions.forEach((d, i) => {
   >
     <div class="container mx-auto max-w-4xl px-6 py-24">
       <div class="space-y-8 fade-in-section">
-        <div class="text-xs uppercase tracking-[0.3em] text-gray-500">
+        <div class="text-sm uppercase tracking-[0.3em] text-gray-500">
           Conclusion
         </div>
 
@@ -1316,6 +1360,54 @@ normalizedRadarDimensions.forEach((d, i) => {
     font-weight: 700;
   }
 
+  .radio-custom {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    border-radius: 50% !important;
+    border: 2px solid #d1d5db !important;
+    background-color: #ffffff !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .radio-custom:checked {
+    background-color: #000000 !important;
+    border: 3px solid #ffffff !important;
+    box-shadow: 0 0 0 2px #000000 !important;
+  }
+
+  .radio-custom:hover {
+    border-color: #9ca3af !important;
+  }
+
+  :global(figure [aria-label="color-legend"]),
+  :global(figure [aria-label="color-legend"] *),
+  :global(figure svg g[aria-label="color-legend"] text),
+  :global(figure svg g[aria-label="color-legend"] span) {
+    color: #000000 !important;
+    fill: #000000 !important;
+  }
+
+  :global(figure svg g[aria-label="x-axis"] text),
+  :global(figure svg g[aria-label="y-axis"] text),
+  :global(
+      figure
+        svg
+        text[fill]:not([fill="#ffffff"]):not([fill="white"]):not([fill="#fff"])
+    ) {
+    fill: #000000 !important;
+  }
+
+  :global(figure svg text) {
+    fill: currentColor;
+  }
+
+  :global(figure) {
+    color: #000000 !important;
+  }
+
   .prose p {
     margin-bottom: 1.5rem;
   }
@@ -1425,6 +1517,13 @@ normalizedRadarDimensions.forEach((d, i) => {
     const container = document.getElementById("chart-container");
     if (!container || !window.Plot) return;
 
+    const subtitle = document.getElementById("chart-subtitle");
+    if (subtitle) {
+      subtitle.textContent = `Nombre d'habitants par ${
+        choixType === "physique" ? "lieu culturel physique" : "offre numérique"
+      } — Bordeaux vs Montpellier`;
+    }
+
     container.innerHTML = "";
 
     const filteredData = LieuxParVilleTypeData.filter(
@@ -1432,20 +1531,16 @@ normalizedRadarDimensions.forEach((d, i) => {
     );
 
     const plot = window.Plot.plot({
-      title: "Accessibilité culturelle selon le type d'offre (2025)",
-      subtitle: `Nombre d'habitants par ${
-        choixType === "physique" ? "lieu culturel physique" : "offre numérique"
-      } — Bordeaux vs Montpellier`,
       height: 480,
       marginLeft: 100,
       marginBottom: 70,
-      marginTop: 80,
+      marginTop: 40,
       width: 560,
       style: {
         background: "linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)",
         fontSize: "14px",
         fontFamily: "Inter, system-ui, -apple-system, sans-serif",
-        color: "#111111",
+        color: "#000000",
       },
       x: {
         label: "Ville",
@@ -1522,6 +1617,31 @@ normalizedRadarDimensions.forEach((d, i) => {
     });
 
     container.appendChild(plot);
+
+    setTimeout(() => {
+      const allTexts = container.querySelectorAll("svg text");
+      allTexts.forEach((text) => {
+        const textContent = text.textContent || "";
+        const isLieuxText = /^\d+\s+(lieu|offre)/.test(textContent.trim());
+
+        if (isLieuxText) {
+          text.setAttribute("fill", "#ffffff");
+          text.style.fill = "#ffffff";
+        } else {
+          const fillColor = text.getAttribute("fill");
+          const computedFill = window.getComputedStyle(text).fill;
+          if (
+            fillColor !== "#ffffff" &&
+            fillColor !== "white" &&
+            fillColor !== "#fff" &&
+            !computedFill.includes("255, 255, 255")
+          ) {
+            text.setAttribute("fill", "#000000");
+            text.style.fill = "#000000";
+          }
+        }
+      });
+    }, 100);
   }
 
   const radioInputs = document.querySelectorAll('input[name="choixType"]');
@@ -1539,7 +1659,31 @@ normalizedRadarDimensions.forEach((d, i) => {
     }
   }
 
+  function forceBlackText() {
+    const allFigures = document.querySelectorAll("figure");
+    allFigures.forEach((figure) => {
+      const allTexts = figure.querySelectorAll("svg text");
+      allTexts.forEach((text) => {
+        const fillColor = text.getAttribute("fill");
+        const computedFill = window.getComputedStyle(text).fill;
+        if (
+          fillColor !== "#ffffff" &&
+          fillColor !== "white" &&
+          fillColor !== "#fff" &&
+          !computedFill.includes("255, 255, 255")
+        ) {
+          text.setAttribute("fill", "#000000");
+          text.style.fill = "#000000";
+        }
+      });
+    });
+  }
+
   initChart();
+
+  setTimeout(forceBlackText, 500);
+  setTimeout(forceBlackText, 1000);
+  setTimeout(forceBlackText, 2000);
 
   // ========== LEAFLET MAPS INITIALIZATION ==========
   let mapBordeaux = null;
@@ -1849,18 +1993,15 @@ normalizedRadarDimensions.forEach((d, i) => {
       },
       width: 550,
       height: 680,
-      marginTop: 90,
+      marginTop: 40,
       marginBottom: 50,
       marginLeft: 20,
       marginRight: 20,
       style: {
         background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
         fontFamily: "Inter, system-ui, -apple-system, sans-serif",
-        color: "#1a1a1a",
+        color: "#000000",
       },
-      title: "Accessibilité culturelle à Bordeaux",
-      subtitle:
-        "Répartition géographique des lieux et initiatives culturelles — physiques et numériques • 2025",
       color: {
         legend: true,
         label: "Type d'offre culturelle",
@@ -1908,6 +2049,23 @@ normalizedRadarDimensions.forEach((d, i) => {
     });
 
     container.appendChild(plot);
+
+    setTimeout(() => {
+      const allTexts = container.querySelectorAll("svg text");
+      allTexts.forEach((text) => {
+        const fillColor = text.getAttribute("fill");
+        const computedFill = window.getComputedStyle(text).fill;
+        if (
+          fillColor !== "#ffffff" &&
+          fillColor !== "white" &&
+          fillColor !== "#fff" &&
+          !computedFill.includes("255, 255, 255")
+        ) {
+          text.setAttribute("fill", "#000000");
+          text.style.fill = "#000000";
+        }
+      });
+    }, 100);
   }
 
   function renderGeoMontpellier(filteredData: any[]) {
@@ -1925,18 +2083,15 @@ normalizedRadarDimensions.forEach((d, i) => {
       },
       width: 550,
       height: 680,
-      marginTop: 90,
+      marginTop: 40,
       marginBottom: 50,
       marginLeft: 20,
       marginRight: 20,
       style: {
         background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
         fontFamily: "Inter, system-ui, -apple-system, sans-serif",
-        color: "#1a1a1a",
+        color: "#000000",
       },
-      title: "Accessibilité culturelle à Montpellier",
-      subtitle:
-        "Répartition géographique des lieux et initiatives culturelles — physiques et numériques • 2025",
       color: {
         legend: true,
         label: "Type d'offre culturelle",
@@ -1984,6 +2139,23 @@ normalizedRadarDimensions.forEach((d, i) => {
     });
 
     container.appendChild(plot);
+
+    setTimeout(() => {
+      const allTexts = container.querySelectorAll("svg text");
+      allTexts.forEach((text) => {
+        const fillColor = text.getAttribute("fill");
+        const computedFill = window.getComputedStyle(text).fill;
+        if (
+          fillColor !== "#ffffff" &&
+          fillColor !== "white" &&
+          fillColor !== "#fff" &&
+          !computedFill.includes("255, 255, 255")
+        ) {
+          text.setAttribute("fill", "#000000");
+          text.style.fill = "#000000";
+        }
+      });
+    }, 100);
   }
 
   function updateGeoMaps() {

@@ -9,7 +9,7 @@ import SimpleLayout from "../layouts/SimpleLayout.astro";
   <div class="min-h-screen">
     <div class="container mx-auto px-6 py-24 max-w-4xl">
       <div class="space-y-8 mb-16">
-        <div class="text-xs uppercase tracking-[0.3em] text-gray-500">
+        <div class="text-sm uppercase tracking-[0.3em] text-gray-500">
           Données et méthodologie
         </div>
 
@@ -20,82 +20,191 @@ import SimpleLayout from "../layouts/SimpleLayout.astro";
         </h1>
 
         <p class="text-xl text-gray-700 leading-relaxed">
-          Toutes les données utilisées dans cette analyse proviennent de sources
-          publiques et ouvertes
+          Notre analyse repose sur 6 jeux de données publics issus des portails
+          Open Data du gouvernement français
         </p>
       </div>
 
       <div class="prose prose-lg max-w-none space-y-12">
         <section>
-          <h2 class="text-3xl font-serif text-[#111111] mb-6">
-            Sources principales
+          <h2 class="text-3xl font-serif text-[#111111] mb-8">
+            Jeux de données utilisés
           </h2>
-          <div class="space-y-8 text-lg text-gray-700 leading-relaxed">
-            <div>
+
+          <div class="space-y-10">
+            <div class="border-l-4 border-[#11273f] pl-6">
               <h3 class="text-2xl font-semibold text-[#111111] mb-3">
-                Ministère de la Culture
+                01 — BASILIC
               </h3>
-              <p>
-                <strong>data.culture.gouv.fr</strong> — Base de données nationale
-                des équipements culturels
+              <p class="text-base text-gray-600 mb-3 italic">
+                Base des lieux et équipements culturels
               </p>
-              <p class="text-base text-gray-600">
-                Inventaire exhaustif des lieux culturels français : musées,
-                monuments historiques, bibliothèques, salles de spectacle,
-                cinémas, festivals, etc.
+              <p class="text-lg text-gray-700 leading-relaxed mb-4">
+                Base géocodée des sites, lieux et équipements culturels conçue
+                et administrée par le département des études, de la prospective,
+                des statistiques et de la documentation du ministère de la
+                Culture. Elle alimente notamment la base permanente des
+                équipements de l'Insee et l'Atlas Culture des territoires.
               </p>
+              <a
+                href="https://www.data.gouv.fr/datasets/base-des-lieux-et-equipements-culturels-basilic/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 text-[#11273f] font-semibold hover:underline"
+              >
+                Consulter la source
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path>
+                </svg>
+              </a>
             </div>
 
-            <div>
+            <div class="border-l-4 border-[#C45500] pl-6">
               <h3 class="text-2xl font-semibold text-[#111111] mb-3">
-                Bordeaux Métropole
+                02 — #CultureChezNous
               </h3>
-              <p>
-                <strong>Open Data Bordeaux Métropole</strong> — Données territoriales
-                et culturelles
+              <p class="text-base text-gray-600 mb-3 italic">
+                Offre culturelle numérique
               </p>
-              <p class="text-base text-gray-600">
-                Informations géolocalisées sur les équipements culturels,
-                événements et initiatives numériques de la métropole bordelaise.
+              <p class="text-lg text-gray-700 leading-relaxed mb-4">
+                Base répertoriant une large offre de contenus culturels en ligne
+                issue d'environ 500 opérateurs culturels et artistiques situés
+                en France. Plus de 1 000 propositions : expositions virtuelles,
+                films, spectacles, podcasts, conférences, jeux et ateliers.
               </p>
+              <a
+                href="https://www.data.gouv.fr/datasets/culturecheznous/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 text-[#C45500] font-semibold hover:underline"
+              >
+                Consulter la source
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path>
+                </svg>
+              </a>
             </div>
 
-            <div>
+            <div class="border-l-4 border-gray-400 pl-6">
               <h3 class="text-2xl font-semibold text-[#111111] mb-3">
-                Montpellier Méditerranée Métropole
+                03 — Adresses des bibliothèques de France
               </h3>
-              <p>
-                <strong>Open Data Montpellier</strong> — Portail de données ouvertes
+              <p class="text-base text-gray-600 mb-3 italic">
+                Répertoire national des bibliothèques
               </p>
-              <p class="text-base text-gray-600">
-                Catalogue des équipements culturels, manifestations et projets
-                numériques de la métropole montpelliéraine.
+              <p class="text-lg text-gray-700 leading-relaxed mb-4">
+                Ensemble des bibliothèques publiques et universitaires de France
+                avec leurs coordonnées géographiques et informations détaillées.
               </p>
+              <a
+                href="https://defis.data.gouv.fr/datasets/5c3538da9ce2e7459c6d765a"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 text-[#111111] font-semibold hover:underline"
+              >
+                Consulter la source
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path>
+                </svg>
+              </a>
             </div>
-          </div>
-        </section>
 
-        <section class="border-t border-gray-300 pt-12">
-          <h2 class="text-3xl font-serif text-[#111111] mb-6">
-            Méthodologie de traitement
-          </h2>
-          <div class="space-y-6 text-lg text-gray-700 leading-relaxed">
-            <p>
-              Les données ont été collectées, nettoyées et harmonisées pour
-              permettre une comparaison équitable entre les deux métropoles.
-            </p>
-            <div class="space-y-3">
-              <p><strong>Étapes du traitement :</strong></p>
-              <ol class="list-decimal list-inside space-y-2 ml-4">
-                <li>Extraction des données depuis les API et fichiers CSV</li>
-                <li>Nettoyage et normalisation des formats</li>
-                <li>Géocodage des adresses pour la cartographie</li>
-                <li>Catégorisation des types d'équipements</li>
-                <li>
-                  Calcul des indicateurs (densité, accessibilité, diversité)
-                </li>
-                <li>Visualisation avec Observable Plot et Leaflet</li>
-              </ol>
+            <div class="border-l-4 border-gray-400 pl-6">
+              <h3 class="text-2xl font-semibold text-[#111111] mb-3">
+                04 — Répertoire des Musées de France
+              </h3>
+              <p class="text-base text-gray-600 mb-3 italic">Base Muséofile</p>
+              <p class="text-lg text-gray-700 leading-relaxed mb-4">
+                Base de données nationale recensant l'ensemble des musées de
+                France avec leurs collections, spécialités et informations de
+                contact.
+              </p>
+              <a
+                href="https://defis.data.gouv.fr/datasets/5d12ee8206e3e762c0c89a4c"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 text-[#111111] font-semibold hover:underline"
+              >
+                Consulter la source
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path>
+                </svg>
+              </a>
+            </div>
+
+            <div class="border-l-4 border-gray-400 pl-6">
+              <h3 class="text-2xl font-semibold text-[#111111] mb-3">
+                05 — Liste des festivals de France
+              </h3>
+              <p class="text-base text-gray-600 mb-3 italic">
+                Répertoire des événements culturels
+              </p>
+              <p class="text-lg text-gray-700 leading-relaxed mb-4">
+                Inventaire exhaustif des festivals culturels organisés sur le
+                territoire français : musique, théâtre, cinéma, arts visuels,
+                littérature, etc.
+              </p>
+              <a
+                href="https://defis.data.gouv.fr/datasets/62cf95993d99f22480f49334"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 text-[#111111] font-semibold hover:underline"
+              >
+                Consulter la source
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path>
+                </svg>
+              </a>
             </div>
           </div>
         </section>
@@ -120,12 +229,41 @@ import SimpleLayout from "../layouts/SimpleLayout.astro";
 
         <section class="border-t border-gray-300 pt-12">
           <h2 class="text-3xl font-serif text-[#111111] mb-6">
-            Accès aux données
+            Licences et utilisation
+          </h2>
+          <div class="space-y-4 text-lg text-gray-700 leading-relaxed">
+            <p>
+              Toutes les données utilisées sont publiées sous <strong
+                >Licence Ouverte / Open Licence version 2.0</strong
+              >, permettant leur réutilisation libre à condition de citer la
+              source.
+            </p>
+            <p class="text-base text-gray-600">
+              Les données sont issues des portails <a
+                href="https://www.data.gouv.fr"
+                target="_blank"
+                class="text-[#11273f] font-semibold hover:underline"
+                >data.gouv.fr</a
+              > et <a
+                href="https://defis.data.gouv.fr"
+                target="_blank"
+                class="text-[#11273f] font-semibold hover:underline"
+                >defis.data.gouv.fr</a
+              >, portés par la Direction Interministérielle du Numérique (DINUM)
+              et le Ministère de la Culture.
+            </p>
+          </div>
+        </section>
+
+        <section class="border-t border-gray-300 pt-12">
+          <h2 class="text-3xl font-serif text-[#111111] mb-6">
+            Code source et reproductibilité
           </h2>
           <p class="text-lg text-gray-700 leading-relaxed">
-            L'ensemble des données traitées et le code source de cette analyse
-            sont disponibles en open source. Pour toute question ou demande
-            d'accès aux données brutes, contactez-nous.
+            L'ensemble du code source de cette analyse est disponible en open
+            source. La méthodologie de traitement des données est documentée et
+            reproductible. Pour toute question ou demande d'accès aux données
+            traitées, contactez-nous.
           </p>
         </section>
 
