@@ -650,7 +650,7 @@ normalizedRadarDimensions.forEach((d, i) => {
 
   async function loadData() {
     try {
-      const response = await fetch("/src/assets/DataCulturelles2025.json");
+      const response = await fetch("/DataCulturelles2025.json");
       const data = await response.json();
 
       dataBordeaux = data.filter((d) => d.ville?.toLowerCase() === "bordeaux");

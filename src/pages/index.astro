@@ -65,7 +65,7 @@ const radarData = generateRadarData(normalizedRadarDimensions);
   >
     <div class="absolute inset-0">
       <img
-        src="/src/assets/img/fond_bordeaux.jpg"
+        src="/fond_bordeaux.jpg"
         alt="Carte de Bordeaux"
         class="w-full h-full object-cover opacity-30 grayscale"
       />
@@ -1228,7 +1228,7 @@ const radarData = generateRadarData(normalizedRadarDimensions);
 
   async function loadData() {
     try {
-      const response = await fetch("/src/assets/DataCulturelles2025.json");
+      const response = await fetch("/DataCulturelles2025.json");
       const data = await response.json();
 
       dataBordeaux = data.filter((d) => d.ville?.toLowerCase() === "bordeaux");
