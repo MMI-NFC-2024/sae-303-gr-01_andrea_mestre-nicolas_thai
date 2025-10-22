@@ -1,0 +1,166 @@
+---
+import SimpleLayout from "../layouts/SimpleLayout.astro";
+---
+
+<SimpleLayout
+  title="Mentions légales"
+  description="Mentions légales du projet SAÉ 303 - Analyse comparative des dynamiques culturelles entre Bordeaux et Montpellier."
+>
+  <div class="min-h-screen">
+    <div class="container mx-auto px-6 py-24 max-w-4xl">
+      <div class="space-y-8 mb-16">
+        <div class="text-xs uppercase tracking-[0.3em] text-gray-500">
+          Informations légales
+        </div>
+
+        <h1
+          class="text-4xl md:text-5xl lg:text-6xl font-serif text-[#111111] leading-tight"
+        >
+          Mentions légales
+        </h1>
+
+        <p class="text-xl text-gray-700 leading-relaxed">
+          Conformément aux dispositions de la loi n° 2004-575 du 21 juin 2004
+          pour la confiance en l'économie numérique.
+        </p>
+      </div>
+
+      <div class="prose prose-lg max-w-none space-y-16">
+        <section>
+          <h2 class="text-3xl font-serif text-[#111111] mb-6">
+            Éditeur du site
+          </h2>
+          <div class="space-y-4 text-gray-700 text-lg leading-relaxed">
+            <p>
+              <strong>Projet :</strong> SAÉ 303 — Datavisualisation<br />
+              Analyse comparative des offres culturelles : Bordeaux vs Montpellier
+            </p>
+            <p>
+              <strong>Auteurs :</strong><br />
+              Andrea Mestre & Nicolas Thai<br />
+              <span class="text-base text-gray-600">Étudiants BUT MMI</span>
+            </p>
+            <p>
+              <strong>Établissement :</strong><br />
+              IUT Bordeaux Montaigne<br />
+              Département MMI (Métiers du Multimédia et de l'Internet)
+            </p>
+          </div>
+        </section>
+
+        <section class="border-t border-gray-300 pt-16">
+          <h2 class="text-3xl font-serif text-[#111111] mb-6">Hébergement</h2>
+          <p class="text-lg text-gray-700 leading-relaxed">
+            Ce site est hébergé par <strong>Netlify</strong><br />
+            340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis
+          </p>
+        </section>
+
+        <section class="border-t border-gray-300 pt-16">
+          <h2 class="text-3xl font-serif text-[#111111] mb-6">
+            Propriété intellectuelle
+          </h2>
+          <div class="space-y-4 text-lg text-gray-700 leading-relaxed">
+            <p>
+              L'ensemble du contenu de ce site (textes, graphiques,
+              visualisations de données, images, code source) est la propriété
+              intellectuelle des auteurs, sauf mention contraire.
+            </p>
+            <p>
+              Les données culturelles utilisées proviennent de sources publiques
+              et ouvertes, notamment :
+            </p>
+            <ul class="list-disc list-inside space-y-2 ml-4 text-base">
+              <li>Ministère de la Culture (data.culture.gouv.fr)</li>
+              <li>Open Data des métropoles de Bordeaux et Montpellier</li>
+              <li>Base de données des équipements culturels publics</li>
+            </ul>
+            <p class="text-base text-gray-600 italic mt-6">
+              Ce projet a été réalisé dans le cadre d'un exercice pédagogique
+              universitaire (SAÉ 303). Toute reproduction ou utilisation du
+              contenu doit faire l'objet d'une autorisation préalable des
+              auteurs.
+            </p>
+          </div>
+        </section>
+
+        <section class="border-t border-gray-300 pt-16">
+          <h2 class="text-3xl font-serif text-[#111111] mb-6">
+            Protection des données personnelles
+          </h2>
+          <div class="space-y-4 text-lg text-gray-700 leading-relaxed">
+            <p>
+              Conformément au Règlement Général sur la Protection des Données
+              (RGPD), nous vous informons que :
+            </p>
+            <p class="font-semibold text-[#111111]">
+              ✓ Aucune donnée personnelle n'est collectée sur ce site
+            </p>
+            <p class="text-base text-gray-600">
+              Ce site est purement informatif et ne collecte aucune donnée
+              personnelle des visiteurs. Aucun formulaire de contact,
+              inscription ou système de commentaires n'est présent.
+            </p>
+          </div>
+        </section>
+
+        <section class="border-t border-gray-300 pt-16">
+          <h2 class="text-3xl font-serif text-[#111111] mb-6">
+            Cookies et technologies similaires
+          </h2>
+          <div class="space-y-4 text-lg text-gray-700 leading-relaxed">
+            <p>
+              Ce site n'utilise pas de cookies de suivi ou de cookies
+              publicitaires. Seuls des cookies strictement nécessaires au
+              fonctionnement du site peuvent être utilisés (préférences
+              d'affichage, session de navigation).
+            </p>
+          </div>
+        </section>
+
+        <section class="border-t border-gray-300 pt-16">
+          <h2 class="text-3xl font-serif text-[#111111] mb-6">
+            Technologies utilisées
+          </h2>
+          <div class="space-y-4 text-lg text-gray-700 leading-relaxed">
+            <p>
+              <strong>Framework et bibliothèques :</strong><br />
+              Astro (framework web), Observable Plot (visualisations), Leaflet (cartographie),
+              Tailwind CSS (styles)
+            </p>
+            <p>
+              <strong>Sources de données :</strong><br />
+              Ministère de la Culture, Bordeaux Métropole Open Data, Montpellier
+              Méditerranée Métropole Open Data
+            </p>
+          </div>
+        </section>
+
+        <section class="border-t border-gray-300 pt-16">
+          <h2 class="text-3xl font-serif text-[#111111] mb-6">Contact</h2>
+          <p class="text-lg text-gray-700 leading-relaxed">
+            Pour toute question concernant ce projet ou ces mentions légales :<br
+            />
+            <a
+              href="mailto:contact@example.com"
+              class="text-[#111111] font-semibold underline hover:no-underline"
+              >contact@example.com</a
+            >
+          </p>
+        </section>
+
+        <div class="border-t border-gray-300 pt-8 text-center">
+          <p class="text-sm text-gray-500">
+            Dernière mise à jour : {
+              new Date().toLocaleDateString("fr-FR", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</SimpleLayout>

@@ -1,0 +1,143 @@
+---
+import SimpleLayout from "../layouts/SimpleLayout.astro";
+---
+
+<SimpleLayout
+  title="Sources de données"
+  description="Sources et méthodologie de collecte des données culturelles pour l'analyse comparative entre Bordeaux et Montpellier."
+>
+  <div class="min-h-screen">
+    <div class="container mx-auto px-6 py-24 max-w-4xl">
+      <div class="space-y-8 mb-16">
+        <div class="text-xs uppercase tracking-[0.3em] text-gray-500">
+          Données et méthodologie
+        </div>
+
+        <h1
+          class="text-4xl md:text-5xl lg:text-6xl font-serif text-[#111111] leading-tight"
+        >
+          Sources de données
+        </h1>
+
+        <p class="text-xl text-gray-700 leading-relaxed">
+          Toutes les données utilisées dans cette analyse proviennent de sources
+          publiques et ouvertes
+        </p>
+      </div>
+
+      <div class="prose prose-lg max-w-none space-y-12">
+        <section>
+          <h2 class="text-3xl font-serif text-[#111111] mb-6">
+            Sources principales
+          </h2>
+          <div class="space-y-8 text-lg text-gray-700 leading-relaxed">
+            <div>
+              <h3 class="text-2xl font-semibold text-[#111111] mb-3">
+                Ministère de la Culture
+              </h3>
+              <p>
+                <strong>data.culture.gouv.fr</strong> — Base de données nationale
+                des équipements culturels
+              </p>
+              <p class="text-base text-gray-600">
+                Inventaire exhaustif des lieux culturels français : musées,
+                monuments historiques, bibliothèques, salles de spectacle,
+                cinémas, festivals, etc.
+              </p>
+            </div>
+
+            <div>
+              <h3 class="text-2xl font-semibold text-[#111111] mb-3">
+                Bordeaux Métropole
+              </h3>
+              <p>
+                <strong>Open Data Bordeaux Métropole</strong> — Données territoriales
+                et culturelles
+              </p>
+              <p class="text-base text-gray-600">
+                Informations géolocalisées sur les équipements culturels,
+                événements et initiatives numériques de la métropole bordelaise.
+              </p>
+            </div>
+
+            <div>
+              <h3 class="text-2xl font-semibold text-[#111111] mb-3">
+                Montpellier Méditerranée Métropole
+              </h3>
+              <p>
+                <strong>Open Data Montpellier</strong> — Portail de données ouvertes
+              </p>
+              <p class="text-base text-gray-600">
+                Catalogue des équipements culturels, manifestations et projets
+                numériques de la métropole montpelliéraine.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="border-t border-gray-300 pt-12">
+          <h2 class="text-3xl font-serif text-[#111111] mb-6">
+            Méthodologie de traitement
+          </h2>
+          <div class="space-y-6 text-lg text-gray-700 leading-relaxed">
+            <p>
+              Les données ont été collectées, nettoyées et harmonisées pour
+              permettre une comparaison équitable entre les deux métropoles.
+            </p>
+            <div class="space-y-3">
+              <p><strong>Étapes du traitement :</strong></p>
+              <ol class="list-decimal list-inside space-y-2 ml-4">
+                <li>Extraction des données depuis les API et fichiers CSV</li>
+                <li>Nettoyage et normalisation des formats</li>
+                <li>Géocodage des adresses pour la cartographie</li>
+                <li>Catégorisation des types d'équipements</li>
+                <li>
+                  Calcul des indicateurs (densité, accessibilité, diversité)
+                </li>
+                <li>Visualisation avec Observable Plot et Leaflet</li>
+              </ol>
+            </div>
+          </div>
+        </section>
+
+        <section class="border-t border-gray-300 pt-12">
+          <h2 class="text-3xl font-serif text-[#111111] mb-6">
+            Données démographiques
+          </h2>
+          <div class="space-y-4 text-lg text-gray-700 leading-relaxed">
+            <p>
+              <strong>Bordeaux Métropole :</strong> 1 018 000 habitants (2025)
+            </p>
+            <p>
+              <strong>Montpellier Méditerranée Métropole :</strong> 487 000 habitants
+              (2025)
+            </p>
+            <p class="text-base text-gray-600 italic">
+              Sources : INSEE, estimations métropolitaines
+            </p>
+          </div>
+        </section>
+
+        <section class="border-t border-gray-300 pt-12">
+          <h2 class="text-3xl font-serif text-[#111111] mb-6">
+            Accès aux données
+          </h2>
+          <p class="text-lg text-gray-700 leading-relaxed">
+            L'ensemble des données traitées et le code source de cette analyse
+            sont disponibles en open source. Pour toute question ou demande
+            d'accès aux données brutes, contactez-nous.
+          </p>
+        </section>
+
+        <div class="border-t border-gray-300 pt-12 text-center">
+          <a
+            href="/"
+            class="inline-block px-8 py-4 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-semibold"
+          >
+            Retour à l'accueil
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</SimpleLayout>
