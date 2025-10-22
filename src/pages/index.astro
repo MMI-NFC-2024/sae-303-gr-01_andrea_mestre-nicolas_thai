@@ -1,6 +1,7 @@
 ---
 import ButterflyChart from "../components/charts/ButterflyChart.astro";
 import RadarChart from "../components/charts/RadarChart.astro";
+import DataSource from "../components/DataSource.astro";
 import Layout from "../layouts/Layout.astro";
 import * as Plot from "@observablehq/plot";
 import data from "../assets/DataCulturelles2025.json";
@@ -263,6 +264,7 @@ const radarData = generateRadarData(normalizedRadarDimensions);
                 Montpellier
               </p>
               <div id="chart-container"></div>
+              <DataSource />
             </div>
           </div>
 
@@ -450,6 +452,9 @@ const radarData = generateRadarData(normalizedRadarDimensions);
             </div>
           </div>
         </div>
+        <div class="mt-4">
+          <DataSource />
+        </div>
 
         <div id="geojson-container" class="hidden">
           <div class="mb-4 sm:mb-6 flex justify-center">
@@ -493,6 +498,9 @@ const radarData = generateRadarData(normalizedRadarDimensions);
               <div id="geo-montpellier" class="w-full rounded-xl"></div>
             </div>
           </div>
+          <div class="mt-4">
+            <DataSource />
+          </div>
         </div>
       </div>
     </div>
@@ -535,6 +543,7 @@ const radarData = generateRadarData(normalizedRadarDimensions);
             equipementsDomain={equipementsDomain}
             colors={colors}
           />
+          <DataSource />
         </div>
 
         <div class="bg-white rounded-2xl p-6 sm:p-8 border-l-4 border-[#111111]">
@@ -647,6 +656,7 @@ const radarData = generateRadarData(normalizedRadarDimensions);
               </div>
             </div>
             <RadarChart radarData={radarData} colors={colors} />
+            <DataSource />
           </div>
         </div>
 

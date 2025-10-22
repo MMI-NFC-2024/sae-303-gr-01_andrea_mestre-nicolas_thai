@@ -3,6 +3,7 @@ import SimpleLayout from "../layouts/SimpleLayout.astro";
 import PlotFigure from "../components/PlotFigure.astro";
 import ButterflyChart from "../components/charts/ButterflyChart.astro";
 import RadarChart from "../components/charts/RadarChart.astro";
+import DataSource from "../components/DataSource.astro";
 import * as Plot from "@observablehq/plot";
 import data from "../assets/DataCulturelles2025.json";
 import communes from "../assets/communes.json";
@@ -340,6 +341,7 @@ normalizedRadarDimensions.forEach((d, i) => {
               equipementsDomain={equipementsDomain}
               colors={colors}
             />
+            <DataSource />
           </div>
         </section>
 
@@ -378,6 +380,7 @@ normalizedRadarDimensions.forEach((d, i) => {
               </div>
             </div>
             <RadarChart radarData={radarData} colors={colors} />
+            <DataSource />
           </div>
         </section>
 
