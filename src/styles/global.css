@@ -11,7 +11,7 @@
 
   body {
     font-family: ui-sans-serif, system-ui, sans-serif;
-    font-size: 1rem;
+    font-size: clamp(0.875rem, 0.8rem + 0.5vw, 1rem);
     line-height: 1.7;
     letter-spacing: -0.01em;
   }
@@ -33,5 +33,38 @@
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="16" fill="white" opacity="0.9"/><circle cx="32" cy="32" r="8" fill="black"/></svg>')
         32 32,
       pointer;
+  }
+
+  /* Responsive container improvements */
+  .container {
+    @apply px-4 sm:px-6;
+  }
+
+  /* Responsive text improvements */
+  @media (max-width: 640px) {
+    .prose {
+      font-size: 0.9375rem;
+    }
+  }
+}
+
+/* Responsive chart containers */
+@layer components {
+  .chart-responsive {
+    @apply overflow-x-auto -mx-4 sm:mx-0;
+  }
+
+  .chart-responsive > * {
+    @apply min-w-[600px] sm:min-w-full;
+  }
+
+  /* Map containers */
+  .map-container {
+    @apply h-[400px] sm:h-[500px] lg:h-[600px];
+  }
+
+  /* Button responsive */
+  .btn-responsive {
+    @apply px-3 py-2 text-sm sm:px-4 sm:py-2.5 sm:text-base;
   }
 }
